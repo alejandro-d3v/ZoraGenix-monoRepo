@@ -1,0 +1,28 @@
+{
+  "name": "soragemi-x",
+  "version": "1.0.0",
+  "description": "Sistema de edición de imágenes con IA - SoraGemiX",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n \"FE,BE\" \"npm run dev --workspace frontend\" \"npm run start --workspace backend\"",
+    "build": "npm run build --workspace frontend",
+    "db:migrate": "npm run migrate --workspace backend",
+    "install:all": "npm install && npm install --workspace frontend && npm install --workspace backend"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "keywords": [
+    "image-editing",
+    "ai",
+    "gemini",
+    "react",
+    "nodejs"
+  ],
+  "author": "SoraGemiX Team",
+  "license": "MIT"
+}

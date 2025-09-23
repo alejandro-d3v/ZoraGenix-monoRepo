@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fuentes personalizadas */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* Variables CSS personalizadas */
+:root {
+  --nano-blue: #00D4FF;
+  --nano-blue-dark: #0099cc;
+  --holographic-gradient: linear-gradient(45deg, #00D4FF, #7c3aed, #ec4899, #00D4FF);
+}
+
+/* Estilos base */
+@layer base {
+  * {
+    @apply border-slate-700;
+  }
+  
+  body {
+    @apply bg-slate-900 text-slate-100 font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-500;
+  }
+}
+
+/* Componentes personalizados */
+@layer components {
+  /* Botón principal con efecto holográfico */
+  .btn-primary {
+    @apply bg-gradient-to-r from-nanoBlue-500 to-nanoBlue-400 text-white font-medium px-6 py-3 rounded-lg;
+    @apply hover:from-nanoBlue-600 hover:to-nanoBlue-500 transition-all duration-300;
+    @apply shadow-lg hover:shadow-neon focus:outline-none focus:ring-2 focus:ring-nanoBlue-500 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  .btn-secondary {
+    @apply bg-slate-700 text-slate-200 font-medium px-6 py-3 rounded-lg;
+    @apply hover:bg-slate-600 transition-all duration-300;
+    @apply shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  .btn-ghost {
+    @apply text-slate-300 font-medium px-4 py-2 rounded-lg;
+    @apply hover:bg-slate-800 hover:text-white transition-all duration-300;
+    @apply focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:ring-offset-slate-900;
+  }
+
+  /* Input personalizado */
+  .input-primary {
+    @apply bg-slate-800 border border-slate-700 text-white placeholder-slate-400 px-4 py-3 rounded-lg;
+    @apply focus:outline-none focus:ring-2 focus:ring-nanoBlue-500 focus:border-transparent;
+    @apply transition-all duration-300;
+  }
+
+  /* Card con efecto glassmorphism */
+  .card-glass {
+    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-xl;
+    @apply shadow-xl hover:shadow-2xl transition-all duration-300;
+  }
+
+  /* Efecto holográfico para texto */
+  .text-holographic {
+    background: var(--holographic-gradient);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient 8s linear infinite;
+  }
+
+  /* Loading spinner */
+  .spinner {
+    @apply animate-spin rounded-full border-4 border-slate-600 border-t-nanoBlue-500;
+  }
+
+  /* Navbar glassmorphism */
+  .navbar-glass {
+    @apply bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply bg-slate-800/90 backdrop-blur-sm border-r border-slate-700/50;
+  }
+
+  /* Tool palette */
+  .tool-item {
+    @apply bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600/50;
+    @apply hover:border-nanoBlue-500/50 transition-all duration-300 rounded-lg p-4;
+    @apply cursor-pointer group;
+  }
+
+  .tool-item.active {
+    @apply bg-nanoBlue-500/20 border-nanoBlue-500 shadow-neon;
+  }
+
+  /* Image gallery */
+  .image-card {
+    @apply bg-slate-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl;
+    @apply transition-all duration-300 hover:scale-105;
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-sm z-50;
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-nanoBlue-400 to-purple-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  /* Animaciones personalizadas */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  /* Efectos de hover */
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+
+  .hover-glow {
+    @apply transition-shadow duration-300 hover:shadow-neon;
+  }
+
+  /* Backgrounds personalizados */
+  .bg-mesh {
+    background-image: radial-gradient(at 40% 20%, hsla(228,100%,74%,1) 0px, transparent 50%), 
+                      radial-gradient(at 80% 0%, hsla(189,100%,56%,1) 0px, transparent 50%), 
+                      radial-gradient(at 0% 50%, hsla(355,100%,93%,1) 0px, transparent 50%);
+  }
+
+  /* Estados de carga */
+  .loading-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+}
+
+/* Keyframes adicionales */
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Responsive design helpers */
+@media (max-width: 640px) {
+  .btn-primary,
+  .btn-secondary {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  .input-primary {
+    @apply px-3 py-2 text-sm;
+  }
+}
