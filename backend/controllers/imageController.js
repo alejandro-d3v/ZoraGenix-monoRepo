@@ -509,19 +509,57 @@ const downloadImage = async (req, res, next) => {
     }
 
     const fs = require('fs');
-    const fullPath = path.join(process.cwd(), image.file_path);
+    
+    // Extraer la ruta del archivo desde la URL
+    // image.image_url puede ser: "http://localhost:5001/uploads/generated/filename.png"
+    // o solo: "/uploads/generated/filename.png"
+    let filePath;
+    if (image.image_url.startsWith('http')) {
+      // Extraer la ruta después del dominio
+      const url = new URL(image.image_url);
+      filePath = url.pathname; // "/uploads/generated/filename.png"
+    } else {
+      filePath = image.image_url; // Ya es una ruta relativa
+    }
+    
+    // Construir la ruta completa del archivo
+    console.log('🔍 Debug paths:', {
+      'process.cwd()': process.cwd(),
+      'filePath': filePath,
+      '__dirname': __dirname
+    });
+    
+    // Determinar la ruta base correcta
+    let basePath;
+    if (process.cwd().endsWith('/backend')) {
+      // Si ya estamos en el directorio backend
+      basePath = process.cwd();
+    } else {
+      // Si estamos en el directorio raíz del proyecto
+      basePath = path.join(process.cwd(), 'backend');
+    }
+    
+    const fullPath = path.join(basePath, filePath.substring(1)); // Remover el "/" inicial
 
     // Verificar que el archivo existe
     if (!fs.existsSync(fullPath)) {
       return res.status(404).json({
         success: false,
-        message: 'Archivo de imagen no encontrado en el servidor'
+        message: 'Archivo de imagen no encontrado en el servidor',
+        debug: {
+          image_url: image.image_url,
+          extracted_path: filePath,
+          full_path: fullPath,
+          process_cwd: process.cwd(),
+          __dirname: __dirname,
+          basePath: basePath
+        }
       });
     }
 
     // Obtener información del archivo
     const stats = fs.statSync(fullPath);
-    const filename = path.basename(image.file_path);
+    const filename = path.basename(filePath);
     const ext = path.extname(filename);
     
     // Generar nombre de descarga amigable
