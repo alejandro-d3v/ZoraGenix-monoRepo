@@ -26,6 +26,21 @@ const setApiKeySchema = Joi.object({
   apiKey: Joi.string().required()
 });
 
+const createUserSchema = Joi.object({
+  name: Joi.string().min(2).max(100).required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+  roleId: Joi.number().integer().positive().optional()
+});
+
+const updateUserSchema = Joi.object({
+  name: Joi.string().min(2).max(100).optional(),
+  email: Joi.string().email().optional(),
+  roleId: Joi.number().integer().positive().optional(),
+  password: Joi.string().min(6).optional(),
+  quota: Joi.number().integer().min(0).optional()
+});
+
 class AdminController {
   /**
    * Obtener dashboard con estadísticas generales
@@ -66,6 +81,97 @@ class AdminController {
     }
   }
 
+  /**
+   * Crear usuario (admin)
+   */
+  static async createUser(req, res, next) {
+    try {
+      const { error, value } = createUserSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          errors: error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+        });
+      }
+
+      const { name, email, password, roleId } = value;
+
+      const exists = await User.findByEmail(email);
+      if (exists) {
+        return res.status(409).json({ success: false, message: 'El email ya está registrado' });
+      }
+
+      let finalRoleId = roleId;
+      if (!finalRoleId) {
+        const userRole = await Role.findByName('user');
+        finalRoleId = userRole?.id || 2;
+      }
+
+      const created = await User.create({ name, email, password, role_id: finalRoleId });
+
+      res.status(201).json({
+        success: true,
+        message: 'Usuario creado exitosamente',
+        data: { user: created }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Actualizar usuario (admin)
+   */
+  static async updateUser(req, res, next) {
+    try {
+      const userId = parseInt(req.params.id);
+      if (!userId) {
+        return res.status(400).json({ success: false, message: 'ID de usuario inválido' });
+      }
+
+      const { error, value } = updateUserSchema.validate(req.body);
+      if (error) {
+        return res.status(400).json({
+          success: false,
+          message: 'Datos de entrada inválidos',
+          errors: error.details.map(d => ({ field: d.path.join('.'), message: d.message }))
+        });
+      }
+
+      const { name, email, roleId, password, quota } = value;
+
+      if (email) {
+        const existing = await User.findByEmail(email);
+        if (existing && existing.id !== userId) {
+          return res.status(409).json({ success: false, message: 'El email ya está en uso' });
+        }
+      }
+
+      let updated = null;
+      if (name || email) {
+        updated = await User.updateBasic(userId, { name, email });
+      }
+      if (typeof roleId === 'number') {
+        updated = await User.updateRole(userId, roleId);
+      }
+      if (typeof quota === 'number') {
+        updated = await User.updateQuota(userId, quota);
+      }
+      if (password) {
+        await User.updatePassword(userId, password);
+        updated = await User.findById(userId);
+      }
+
+      res.json({
+        success: true,
+        message: 'Usuario actualizado',
+        data: { user: updated || (await User.findById(userId)) }
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   /**
    * Obtener todos los usuarios
    */

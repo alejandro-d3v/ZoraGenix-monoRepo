@@ -150,11 +150,13 @@ export const adminAPI = {
   
   // Usuarios
   getAllUsers: () => api.get('/admin/users'),
+  createUser: (user) => api.post('/admin/users', user),
   getUser: (id) => api.get(`/admin/users/${id}`),
   updateUserQuota: (id, quota) => api.patch(`/admin/users/${id}/quota`, { quota }),
   resetUserPassword: (id, newPassword) => 
     api.patch(`/admin/users/${id}/reset-password`, { newPassword }),
   updateUserRole: (id, roleId) => api.patch(`/admin/users/${id}/role`, { roleId }),
+  updateUser: (id, payload) => api.patch(`/admin/users/${id}`, payload),
   deleteUser: (id) => api.delete(`/admin/users/${id}`),
   
   // Imágenes

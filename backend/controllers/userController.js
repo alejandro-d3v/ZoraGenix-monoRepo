@@ -80,9 +80,8 @@ class UserController {
       if (name) updateData.name = name;
       if (email) updateData.email = email;
 
-      // TODO: Implementar actualización de perfil en el modelo User
-      // Por ahora, devolvemos el usuario actual
-      const updatedUser = await User.findById(userId);
+      // Actualizar perfil usando el método updateBasic
+      const updatedUser = await User.updateBasic(userId, updateData);
       const { password, ...userProfile } = updatedUser;
 
       res.json({

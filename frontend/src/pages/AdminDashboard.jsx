@@ -5,24 +5,31 @@ import {
   FiImage, 
   FiSettings, 
   FiTool, 
-  // FiBarChart3,
   FiShield,
   FiKey,
   FiDatabase,
   FiPlus,
   FiEdit,
   FiTrash2,
-  FiEye
+  FiEye,
+  FiSearch,
+  FiFilter,
+  FiDollarSign
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { adminAPI, toolAPI } from '../services/api';
 import clsx from 'clsx';
 import LoadingSpinner from '../components/LoadingSpinner';
+import UserModal from '../components/UserModal';
+import QuotaModal from '../components/QuotaModal';
+import ConfirmModal from '../components/ConfirmModal';
+import ToolModal from '../components/ToolModal';
+import RoleToolsModal from '../components/RoleToolsModal';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user: authUser, logout } = useAuth();
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [images, setImages] = useState([]);
@@ -30,6 +37,18 @@ const AdminDashboard = () => {
   const [systemConfig, setSystemConfig] = useState({});
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Modal states
+  const [userModal, setUserModal] = useState({ isOpen: false, user: null });
+  const [quotaModal, setQuotaModal] = useState({ isOpen: false, user: null });
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, user: null, action: null });
+  const [toolModal, setToolModal] = useState({ isOpen: false, tool: null });
+  const [roleToolsModal, setRoleToolsModal] = useState({ isOpen: false, role: null });
+  
+  // User management states
+  const [roles, setRoles] = useState([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userFilter, setUserFilter] = useState('all'); // 'all', 'admin', 'user'
 
   useEffect(() => {
     loadDashboardData();
@@ -69,6 +88,12 @@ const AdminDashboard = () => {
         setSystemConfig(configResponse.data.data.config);
       }
 
+      // Cargar roles
+      const rolesResponse = await adminAPI.getAllRoles();
+      if (rolesResponse.data.success) {
+        setRoles(rolesResponse.data.data.roles);
+      }
+
     } catch (error) {
       console.error('Error cargando datos del dashboard:', error);
       toast.error('Error cargando datos del dashboard');
@@ -77,11 +102,152 @@ const AdminDashboard = () => {
     }
   };
 
+  // User management functions
+  const handleCreateUser = () => {
+    setUserModal({ isOpen: true, user: null });
+  };
+
+  const handleEditUser = (user) => {
+    setUserModal({ isOpen: true, user });
+  };
+
+  const handleDeleteUser = (user) => {
+    setConfirmModal({
+      isOpen: true,
+      user,
+      action: 'delete'
+    });
+  };
+
+  const handleModifyQuota = (user) => {
+    setQuotaModal({ isOpen: true, user });
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!confirmModal.user) return;
+    
+    try {
+      let response;
+      if (confirmModal.action === 'deleteTool') {
+        response = await adminAPI.deleteTool(confirmModal.user.id);
+        if (response.data.success) {
+          toast.success('Herramienta eliminada exitosamente');
+          setTools(tools.filter(t => t.id !== confirmModal.user.id));
+        }
+      } else {
+        response = await adminAPI.deleteUser(confirmModal.user.id);
+        if (response.data.success) {
+          toast.success('Usuario eliminado exitosamente');
+          setUsers(users.filter(u => u.id !== confirmModal.user.id));
+        }
+      }
+      
+      if (response.data.success) {
+        setConfirmModal({ isOpen: false, user: null, action: null });
+      } else {
+        toast.error(response.data.message || 'Error al eliminar');
+      }
+    } catch (error) {
+      console.error('Error deleting:', error);
+      toast.error('Error al eliminar');
+    }
+  };
+
+  const handleUserSaved = () => {
+    // Reload users data
+    loadDashboardData();
+  };
+
+  const handleQuotaUpdated = () => {
+    // Reload users data
+    loadDashboardData();
+  };
+
+  // Filter users based on search and filter
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+                         user.email.toLowerCase().includes(userSearch.toLowerCase());
+    
+    const matchesFilter = userFilter === 'all' || user.role_name === userFilter;
+    
+    return matchesSearch && matchesFilter;
+  });
+
+  // Tool management functions
+  const handleCreateTool = () => {
+    setToolModal({ isOpen: true, tool: null });
+  };
+
+  const handleEditTool = (tool) => {
+    setToolModal({ isOpen: true, tool });
+  };
+
+  const handleDeleteTool = (tool) => {
+    setConfirmModal({
+      isOpen: true,
+      user: tool, // Reutilizamos la estructura pero con tool
+      action: 'deleteTool'
+    });
+  };
+
+  const handleToggleTool = async (tool) => {
+    try {
+      const response = await adminAPI.toggleTool(tool.id);
+      if (response.data.success) {
+        toast.success(`Herramienta ${response.data.data.tool.is_active ? 'activada' : 'desactivada'} exitosamente`);
+        // Actualizar la herramienta en la lista local
+        setTools(tools.map(t => 
+          t.id === tool.id 
+            ? { ...t, is_active: response.data.data.tool.is_active }
+            : t
+        ));
+      } else {
+        toast.error(response.data.message || 'Error al cambiar estado de herramienta');
+      }
+    } catch (error) {
+      console.error('Error toggling tool:', error);
+      toast.error('Error al cambiar estado de herramienta');
+    }
+  };
+
+  const confirmDeleteTool = async () => {
+    if (!confirmModal.user) return; // user contiene el tool
+    
+    try {
+      const response = await adminAPI.deleteTool(confirmModal.user.id);
+      if (response.data.success) {
+        toast.success('Herramienta eliminada exitosamente');
+        setTools(tools.filter(t => t.id !== confirmModal.user.id));
+        setConfirmModal({ isOpen: false, user: null, action: null });
+      } else {
+        toast.error(response.data.message || 'Error al eliminar herramienta');
+      }
+    } catch (error) {
+      console.error('Error deleting tool:', error);
+      toast.error('Error al eliminar herramienta');
+    }
+  };
+
+  const handleToolSaved = () => {
+    // Reload tools data
+    loadDashboardData();
+  };
+
+  const handleManageRoleTools = (role) => {
+    setRoleToolsModal({ isOpen: true, role });
+  };
+
+  const handleRoleUpdated = () => {
+    // Reload roles data
+    loadDashboardData();
+  };
+
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: FiUsers },
     { id: 'users', name: 'Usuarios', icon: FiUsers },
     { id: 'images', name: 'Imágenes', icon: FiImage },
     { id: 'tools', name: 'Herramientas', icon: FiTool },
+    { id: 'roles', name: 'Roles', icon: FiShield },
     { id: 'config', name: 'Configuración', icon: FiSettings }
   ];
 
@@ -185,14 +351,45 @@ const AdminDashboard = () => {
 
   const renderUsers = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h3 className="text-2xl font-bold text-white">Gestión de Usuarios</h3>
-        <button className="btn-primary flex items-center space-x-2">
+        <button 
+          onClick={handleCreateUser}
+          className="btn-primary flex items-center space-x-2"
+        >
           <FiPlus className="w-4 h-4" />
           <span>Nuevo Usuario</span>
         </button>
       </div>
 
+      {/* Search and filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <input
+            type="text"
+            placeholder="Buscar usuarios por nombre o email..."
+            value={userSearch}
+            onChange={(e) => setUserSearch(e.target.value)}
+            className="input-primary pl-10 w-full"
+          />
+        </div>
+        <div className="relative">
+          <FiFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <select
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="input-primary pl-10 pr-8"
+          >
+            <option value="all">Todos los roles</option>
+            <option value="admin">Administradores</option>
+            <option value="user">Usuarios</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Users table */}
       <div className="card-glass overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -200,56 +397,103 @@ const AdminDashboard = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Usuario</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Rol</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Créditos</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Imágenes</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Cuota</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Registro</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-700">
-              {users.map(user => (
-                <tr key={user.id} className="hover:bg-slate-800/30">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div>
-                      <div className="text-sm font-medium text-white">{user.name}</div>
-                      <div className="text-sm text-slate-400">{user.email}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      user.role_name === 'admin' 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      {user.role_name}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {user.quota_remaining} / {user.quota_used + user.quota_remaining}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-white">
-                    {user.quota_used}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
-                      <button className="text-nanoBlue-400 hover:text-nanoBlue-300">
-                        <FiEye className="w-4 h-4" />
-                      </button>
-                      <button className="text-yellow-400 hover:text-yellow-300">
-                        <FiEdit className="w-4 h-4" />
-                      </button>
-                      <button className="text-red-400 hover:text-red-300">
-                        <FiTrash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+              {filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-slate-400">
+                    {userSearch || userFilter !== 'all' ? 'No se encontraron usuarios' : 'No hay usuarios registrados'}
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredUsers.map(user => (
+                  <tr key={user.id} className="hover:bg-slate-800/30">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
+                        <div className="text-sm font-medium text-white">{user.name}</div>
+                        <div className="text-sm text-slate-400">{user.email}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        user.role_name === 'admin' 
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                          : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      }`}>
+                        {user.role_name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-sm text-white font-medium">{user.quota_remaining}</span>
+                        <span className="text-xs text-slate-400">imágenes</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex space-x-2">
+                        <button 
+                          onClick={() => handleModifyQuota(user)}
+                          className="text-nanoBlue-400 hover:text-nanoBlue-300 transition-colors"
+                          title="Modificar cuota"
+                        >
+                          <FiDollarSign className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleEditUser(user)}
+                          className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                          title="Editar usuario"
+                        >
+                          <FiEdit className="w-4 h-4" />
+                        </button>
+                        {authUser && user.id !== authUser.id && (
+                          <button 
+                            onClick={() => handleDeleteUser(user)}
+                            className="text-red-400 hover:text-red-300 transition-colors"
+                            title="Eliminar usuario"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="card-glass p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">{filteredUsers.length}</p>
+            <p className="text-sm text-slate-400">Usuarios mostrados</p>
+          </div>
+        </div>
+        <div className="card-glass p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-nanoBlue-400">
+              {filteredUsers.reduce((sum, user) => sum + (user.quota_remaining || 0), 0)}
+            </p>
+            <p className="text-sm text-slate-400">Cuota total disponible</p>
+          </div>
+        </div>
+        <div className="card-glass p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-green-400">
+              {filteredUsers.filter(user => user.role_name === 'admin').length}
+            </p>
+            <p className="text-sm text-slate-400">Administradores</p>
+          </div>
         </div>
       </div>
     </div>
@@ -305,53 +549,235 @@ const AdminDashboard = () => {
 
   const renderTools = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h3 className="text-2xl font-bold text-white">Gestión de Herramientas</h3>
-        <button className="btn-primary flex items-center space-x-2">
+        <button 
+          onClick={handleCreateTool}
+          className="btn-primary flex items-center space-x-2"
+        >
           <FiPlus className="w-4 h-4" />
           <span>Nueva Herramienta</span>
         </button>
       </div>
 
+      {/* Tools grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tools.map(tool => (
-          <div key={tool.id} className="card-glass p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h4 className="text-lg font-bold text-white">{tool.name}</h4>
-                <p className="text-sm text-slate-400">{tool.description}</p>
-              </div>
-              <div className="flex space-x-2">
-                <button className="text-yellow-400 hover:text-yellow-300">
-                  <FiEdit className="w-4 h-4" />
+        {tools.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <FiTool className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <p className="text-slate-400 text-lg mb-2">No hay herramientas creadas</p>
+            <p className="text-slate-500 text-sm">Crea tu primera herramienta para comenzar</p>
+          </div>
+        ) : (
+          tools.map(tool => (
+            <div key={tool.id} className="card-glass p-6 relative">
+              {/* Status badge */}
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={() => handleToggleTool(tool)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                    tool.is_active 
+                      ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' 
+                      : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                  }`}
+                  title={tool.is_active ? 'Desactivar herramienta' : 'Activar herramienta'}
+                >
+                  {tool.is_active ? '●' : '○'}
                 </button>
-                <button className="text-red-400 hover:text-red-300">
+              </div>
+
+              {/* Tool info */}
+              <div className="mb-4 pr-12">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-10 h-10 bg-nanoBlue-500/20 rounded-lg flex items-center justify-center">
+                    <FiTool className="w-5 h-5 text-nanoBlue-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white">{tool.name}</h4>
+                    <p className="text-xs text-slate-500">ID: {tool.id}</p>
+                  </div>
+                </div>
+                <p className="text-sm text-slate-400 line-clamp-2">{tool.description}</p>
+              </div>
+              
+              {/* Tool stats */}
+              <div className="space-y-2 text-sm mb-4">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Estado:</span>
+                  <span className={`font-medium ${tool.is_active ? 'text-green-400' : 'text-red-400'}`}>
+                    {tool.is_active ? 'Activa' : 'Inactiva'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Icono:</span>
+                  <span className="text-white font-mono text-xs">{tool.icon}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Creada:</span>
+                  <span className="text-white text-xs">{new Date(tool.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+
+              {/* Prompt preview */}
+              <div className="mb-4 p-3 bg-slate-900/50 rounded-lg">
+                <p className="text-xs text-slate-400 mb-1">Prompt base:</p>
+                <p className="text-xs text-slate-300 font-mono line-clamp-2">
+                  {tool.base_prompt}
+                </p>
+              </div>
+
+              {/* Config preview */}
+              <div className="mb-4 p-3 bg-slate-800/50 rounded-lg">
+                <p className="text-xs text-slate-400 mb-1">Configuración:</p>
+                <div className="text-xs text-slate-300">
+                  {(() => {
+                    try {
+                      const config = typeof tool.custom_config === 'string' 
+                        ? JSON.parse(tool.custom_config) 
+                        : tool.custom_config;
+                      const optionsCount = config?.options?.length || 0;
+                      return `${optionsCount} opciones configuradas`;
+                    } catch {
+                      return 'Configuración inválida';
+                    }
+                  })()}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => handleEditTool(tool)}
+                  className="flex-1 px-3 py-2 bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
+                  <FiEdit className="w-4 h-4" />
+                  <span className="text-sm">Editar</span>
+                </button>
+                <button 
+                  onClick={() => handleDeleteTool(tool)}
+                  className="flex-1 px-3 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors flex items-center justify-center space-x-2"
+                >
                   <FiTrash2 className="w-4 h-4" />
+                  <span className="text-sm">Eliminar</span>
                 </button>
               </div>
             </div>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Estado:</span>
-                <span className={`font-medium ${tool.is_active ? 'text-green-400' : 'text-red-400'}`}>
-                  {tool.is_active ? 'Activa' : 'Inactiva'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Usos:</span>
-                <span className="text-white">{tool.usage_count || 0}</span>
+          ))
+        )}
+      </div>
+
+      {/* Summary */}
+      {tools.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="card-glass p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-white">{tools.length}</p>
+              <p className="text-sm text-slate-400">Total herramientas</p>
+            </div>
+          </div>
+          <div className="card-glass p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-green-400">
+                {tools.filter(tool => tool.is_active).length}
+              </p>
+              <p className="text-sm text-slate-400">Herramientas activas</p>
+            </div>
+          </div>
+          <div className="card-glass p-4">
+            <div className="text-center">
+              <p className="text-2xl font-bold text-red-400">
+                {tools.filter(tool => !tool.is_active).length}
+              </p>
+              <p className="text-sm text-slate-400">Herramientas inactivas</p>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderRoles = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-2xl font-bold text-white">Gestión de Roles</h3>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {roles.map(role => (
+          <div key={role.id} className="card-glass p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                  role.name === 'admin' 
+                    ? 'bg-red-500/20' 
+                    : 'bg-green-500/20'
+                }`}>
+                  <FiShield className={`w-6 h-6 ${
+                    role.name === 'admin' ? 'text-red-400' : 'text-green-400'
+                  }`} />
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-white capitalize">{role.name}</h4>
+                  <p className="text-sm text-slate-400">{role.description}</p>
+                </div>
               </div>
             </div>
 
-            <div className="mt-4 p-3 bg-slate-900/50 rounded-lg">
-              <p className="text-xs text-slate-400 mb-1">Prompt base:</p>
-              <p className="text-xs text-slate-300 font-mono line-clamp-3">
-                {tool.base_prompt}
-              </p>
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Herramientas asignadas:</span>
+                <span className="text-white font-medium">
+                  {role.tools ? role.tools.length : 0} / {tools.length}
+                </span>
+              </div>
+              
+              {role.tools && role.tools.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {role.tools.slice(0, 3).map(tool => (
+                    <span
+                      key={tool.id}
+                      className="px-2 py-1 text-xs bg-nanoBlue-500/20 text-nanoBlue-400 rounded"
+                    >
+                      {tool.name}
+                    </span>
+                  ))}
+                  {role.tools.length > 3 && (
+                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-400 rounded">
+                      +{role.tools.length - 3} más
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
+
+            <button
+              onClick={() => handleManageRoleTools(role)}
+              className="w-full btn-primary flex items-center justify-center space-x-2"
+            >
+              <FiTool className="w-4 h-4" />
+              <span>Gestionar Herramientas</span>
+            </button>
           </div>
         ))}
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="card-glass p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-white">{roles.length}</p>
+            <p className="text-sm text-slate-400">Roles totales</p>
+          </div>
+        </div>
+        <div className="card-glass p-4">
+          <div className="text-center">
+            <p className="text-2xl font-bold text-nanoBlue-400">
+              {roles.reduce((sum, role) => sum + (role.tools ? role.tools.length : 0), 0)}
+            </p>
+            <p className="text-sm text-slate-400">Asignaciones totales</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -463,7 +889,7 @@ const AdminDashboard = () => {
 
             <div className="flex items-center space-x-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{user?.name}</p>
+                <p className="text-sm font-medium text-white">{authUser?.name}</p>
                 <p className="text-xs text-red-400">Administrador</p>
               </div>
               <button
@@ -503,8 +929,49 @@ const AdminDashboard = () => {
           {activeTab === 'users' && renderUsers()}
           {activeTab === 'images' && renderImages()}
           {activeTab === 'tools' && renderTools()}
+          {activeTab === 'roles' && renderRoles()}
           {activeTab === 'config' && renderConfig()}
         </div>
+
+        {/* Modals */}
+        <UserModal
+          isOpen={userModal.isOpen}
+          onClose={() => setUserModal({ isOpen: false, user: null })}
+          user={userModal.user}
+          onUserSaved={handleUserSaved}
+          roles={roles}
+        />
+        <QuotaModal
+          isOpen={quotaModal.isOpen}
+          onClose={() => setQuotaModal({ isOpen: false, user: null })}
+          user={quotaModal.user}
+          onQuotaUpdated={handleQuotaUpdated}
+        />
+        <ToolModal
+          isOpen={toolModal.isOpen}
+          onClose={() => setToolModal({ isOpen: false, tool: null })}
+          tool={toolModal.tool}
+          onToolSaved={handleToolSaved}
+        />
+        <RoleToolsModal
+          isOpen={roleToolsModal.isOpen}
+          onClose={() => setRoleToolsModal({ isOpen: false, role: null })}
+          role={roleToolsModal.role}
+          onRoleUpdated={handleRoleUpdated}
+        />
+        <ConfirmModal
+          isOpen={confirmModal.isOpen}
+          onClose={() => setConfirmModal({ isOpen: false, user: null, action: null })}
+          onConfirm={confirmDeleteUser}
+          title={confirmModal.action === 'deleteTool' ? 'Eliminar Herramienta' : 'Eliminar Usuario'}
+          message={
+            confirmModal.action === 'deleteTool' 
+              ? `¿Seguro que deseas eliminar la herramienta "${confirmModal.user?.name || ''}"? Esta acción no se puede deshacer.`
+              : `¿Seguro que deseas eliminar al usuario "${confirmModal.user?.name || ''}"? Esta acción no se puede deshacer.`
+          }
+          confirmText="Eliminar"
+          type="danger"
+        />
       </div>
     </div>
   );

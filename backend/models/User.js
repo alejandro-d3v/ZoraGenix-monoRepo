@@ -145,6 +145,38 @@ class User {
   }
 
   /**
+   * Actualizar nombre y/o email del usuario
+   */
+  static async updateBasic(userId, { name, email }) {
+    try {
+      const fields = [];
+      const values = [];
+      if (name) {
+        fields.push('name = ?');
+        values.push(name);
+      }
+      if (email) {
+        fields.push('email = ?');
+        values.push(email);
+      }
+
+      if (fields.length === 0) {
+        return await this.findById(userId);
+      }
+
+      const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
+      values.push(userId);
+      const result = await query(sql, values);
+      if (result.affectedRows === 0) {
+        throw new Error('Usuario no encontrado');
+      }
+      return await this.findById(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Verificar contraseña
    */
   static async verifyPassword(plainPassword, hashedPassword) {

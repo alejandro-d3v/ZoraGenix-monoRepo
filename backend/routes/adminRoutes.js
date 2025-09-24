@@ -24,6 +24,13 @@ router.get('/dashboard', AdminController.getDashboard);
  * @access  Admin
  */
 router.get('/users', AdminController.getAllUsers);
+/**
+ * @route   POST /admin/users
+ * @desc    Crear nuevo usuario (admin)
+ * @access  Admin
+ */
+router.post('/users', AdminController.createUser);
+
 
 /**
  * @route   GET /admin/users/:id
@@ -45,6 +52,13 @@ router.patch('/users/:id/quota', AdminController.updateUserQuota);
  * @access  Admin
  */
 router.patch('/users/:id/reset-password', AdminController.resetUserPassword);
+
+/**
+ * @route   PATCH /admin/users/:id
+ * @desc    Actualizar usuario (nombre, email, rol, cuota, password)
+ * @access  Admin
+ */
+router.patch('/users/:id', AdminController.updateUser);
 
 /**
  * @route   PATCH /admin/users/:id/role
