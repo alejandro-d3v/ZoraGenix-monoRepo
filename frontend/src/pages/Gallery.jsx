@@ -10,7 +10,8 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiCalendar,
-  FiZap
+  FiZap,
+  FiRefreshCw
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -154,6 +155,14 @@ const Gallery = () => {
             </div>
 
             <div className="flex items-center space-x-4">
+              <button
+                onClick={() => loadImages(1)}
+                disabled={isLoading}
+                className="btn-ghost p-2"
+                title="Recargar galería"
+              >
+                <FiRefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              </button>
               <span className="text-sm text-slate-400">
                 {pagination.total} imágenes
               </span>
@@ -253,9 +262,13 @@ const Gallery = () => {
                   <div className="aspect-square bg-slate-800 rounded-lg overflow-hidden relative">
                     <img
                       src={image.image_url}
-                      alt={image.original_prompt}
+                      alt={image.prompt || 'Imagen generada'}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                       loading="lazy"
+                      onError={(e) => {
+                        console.error('Error cargando imagen:', image.image_url);
+                        e.target.src = '/placeholder-image.svg'; // Fallback image
+                      }}
                     />
                     
                     {/* Overlay */}
@@ -263,22 +276,22 @@ const Gallery = () => {
                       <FiEye className="w-8 h-8 text-white" />
                     </div>
 
-                    {/* Tool badge */}
+                    {/* ID badge */}
                     <div className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                      {image.tool_name}
+                      #{image.id}
                     </div>
                   </div>
 
                   <div className="p-3">
                     <p className="text-sm text-slate-300 line-clamp-2 mb-2">
-                      {image.original_prompt}
+                      {image.prompt || 'Sin descripción'}
                     </p>
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span className="flex items-center">
                         <FiCalendar className="w-3 h-3 mr-1" />
                         {formatDate(image.created_at)}
                       </span>
-                      <span>{Math.round(image.file_size / 1024)} KB</span>
+                      <span>{image.file_size ? Math.round(image.file_size / 1024) : '?'} KB</span>
                     </div>
                   </div>
                 </motion.div>
@@ -348,11 +361,21 @@ const Gallery = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Image */}
                   <div className="space-y-4">
-                    <img
-                      src={selectedImage.image_url}
-                      alt={selectedImage.original_prompt}
-                      className="w-full rounded-lg shadow-lg"
-                    />
+                    <div className="relative bg-slate-900 rounded-lg overflow-hidden">
+                      <img
+                        src={selectedImage.image_url}
+                        alt={selectedImage.prompt || 'Imagen generada'}
+                        className="w-full rounded-lg shadow-lg"
+                        onError={(e) => {
+                          console.error('Error cargando imagen en modal:', selectedImage.image_url);
+                          e.target.src = '/placeholder-image.svg';
+                        }}
+                      />
+                      {/* Image overlay with ID */}
+                      <div className="absolute top-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        #{selectedImage.id}
+                      </div>
+                    </div>
                     
                     {/* Actions */}
                     <div className="flex space-x-3">
@@ -380,16 +403,22 @@ const Gallery = () => {
                       </h4>
                       <div className="space-y-3">
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Herramienta:</span>
-                          <span className="text-white">{selectedImage.tool_name}</span>
+                          <span className="text-slate-400">ID:</span>
+                          <span className="text-white">#{selectedImage.id}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Tamaño:</span>
-                          <span className="text-white">{Math.round(selectedImage.file_size / 1024)} KB</span>
+                          <span className="text-white">
+                            {selectedImage.file_size ? Math.round(selectedImage.file_size / 1024) : '?'} KB
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-slate-400">Creada:</span>
                           <span className="text-white">{formatDate(selectedImage.created_at)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Usuario:</span>
+                          <span className="text-white">{selectedImage.user_name || 'Usuario'}</span>
                         </div>
                       </div>
                     </div>
@@ -400,7 +429,7 @@ const Gallery = () => {
                       </h4>
                       <div className="bg-slate-900 rounded-lg p-4">
                         <p className="text-slate-300 text-sm font-mono leading-relaxed">
-                          {selectedImage.original_prompt}
+                          {selectedImage.prompt || 'Sin descripción disponible'}
                         </p>
                       </div>
                     </div>

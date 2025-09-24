@@ -423,7 +423,7 @@ const Editor = () => {
                       <div className="bg-slate-800/50 rounded-lg p-4">
                         <h4 className="font-medium text-slate-300 mb-2">Información</h4>
                         <div className="space-y-1 text-sm text-slate-400">
-                          <p>Herramienta: {generatedImage.tool_name}</p>
+                          <p>ID: #{generatedImage.id}</p>
                           <p>Tamaño: {Math.round(generatedImage.file_size / 1024)} KB</p>
                           <p>Creada: {new Date(generatedImage.created_at).toLocaleString()}</p>
                         </div>

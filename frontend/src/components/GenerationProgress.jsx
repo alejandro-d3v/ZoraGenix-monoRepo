@@ -1,8 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiZap, FiImage, FiCheck } from 'react-icons/fi';
 
 const GenerationProgress = ({ isGenerating, currentStep, totalSteps = 3 }) => {
+  // Cerrar con Escape
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isGenerating) {
+        // No permitir cerrar durante la generación
+        e.preventDefault();
+      }
+    };
+
+    if (isGenerating) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isGenerating]);
   const steps = [
     { id: 1, name: 'Procesando opciones', icon: FiZap },
     { id: 2, name: 'Generando imagen', icon: FiImage },

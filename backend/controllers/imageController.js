@@ -233,9 +233,10 @@ const generateImage = async (req, res, next) => {
     );
 
     // Crear registro en base de datos
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5001}`;
     const imageData = {
       user_id: userId,
-      image_url: `/uploads/generated/${filename}`,
+      image_url: `${baseUrl}/uploads/generated/${filename}`,
       prompt: finalPrompt
     };
 
