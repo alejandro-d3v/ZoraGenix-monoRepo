@@ -26,6 +26,7 @@ import QuotaModal from '../components/QuotaModal';
 import ConfirmModal from '../components/ConfirmModal';
 import ToolModal from '../components/ToolModal';
 import RoleToolsModal from '../components/RoleToolsModal';
+import RoleModal from '../components/RoleModal';
 import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
@@ -44,6 +45,7 @@ const AdminDashboard = () => {
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, user: null, action: null });
   const [toolModal, setToolModal] = useState({ isOpen: false, tool: null });
   const [roleToolsModal, setRoleToolsModal] = useState({ isOpen: false, role: null });
+  const [roleModal, setRoleModal] = useState({ isOpen: false, role: null });
   
   // User management states
   const [roles, setRoles] = useState([]);
@@ -133,6 +135,12 @@ const AdminDashboard = () => {
         if (response.data.success) {
           toast.success('Herramienta eliminada exitosamente');
           setTools(tools.filter(t => t.id !== confirmModal.user.id));
+        }
+      } else if (confirmModal.action === 'deleteRole') {
+        response = await adminAPI.deleteRole(confirmModal.user.id);
+        if (response.data.success) {
+          toast.success('Rol eliminado exitosamente');
+          setRoles(roles.filter(r => r.id !== confirmModal.user.id));
         }
       } else {
         response = await adminAPI.deleteUser(confirmModal.user.id);
@@ -238,6 +246,28 @@ const AdminDashboard = () => {
   };
 
   const handleRoleUpdated = () => {
+    // Reload roles data
+    loadDashboardData();
+  };
+
+  // Role CRUD functions
+  const handleCreateRole = () => {
+    setRoleModal({ isOpen: true, role: null });
+  };
+
+  const handleEditRole = (role) => {
+    setRoleModal({ isOpen: true, role });
+  };
+
+  const handleDeleteRole = (role) => {
+    setConfirmModal({
+      isOpen: true,
+      user: role, // Reutilizamos la estructura pero con role
+      action: 'deleteRole'
+    });
+  };
+
+  const handleRoleSaved = () => {
     // Reload roles data
     loadDashboardData();
   };
@@ -699,30 +729,65 @@ const AdminDashboard = () => {
 
   const renderRoles = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <h3 className="text-2xl font-bold text-white">Gestión de Roles</h3>
+        <button 
+          onClick={handleCreateRole}
+          className="btn-primary flex items-center space-x-2"
+        >
+          <FiPlus className="w-4 h-4" />
+          <span>Nuevo Rol</span>
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {roles.map(role => (
-          <div key={role.id} className="card-glass p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  role.name === 'admin' 
-                    ? 'bg-red-500/20' 
-                    : 'bg-green-500/20'
-                }`}>
-                  <FiShield className={`w-6 h-6 ${
-                    role.name === 'admin' ? 'text-red-400' : 'text-green-400'
-                  }`} />
-                </div>
-                <div>
-                  <h4 className="text-lg font-bold text-white capitalize">{role.name}</h4>
-                  <p className="text-sm text-slate-400">{role.description}</p>
+        {roles.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <FiShield className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+            <p className="text-slate-400 text-lg mb-2">No hay roles creados</p>
+            <p className="text-slate-500 text-sm">Crea tu primer rol personalizado</p>
+          </div>
+        ) : (
+          roles.map(role => (
+            <div key={role.id} className="card-glass p-6 relative">
+              {/* Actions menu */}
+              <div className="absolute top-4 right-4 flex space-x-2">
+                <button
+                  onClick={() => handleEditRole(role)}
+                  className="w-8 h-8 bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 rounded-lg flex items-center justify-center transition-colors"
+                  title="Editar rol"
+                >
+                  <FiEdit className="w-4 h-4" />
+                </button>
+                {!['admin', 'user'].includes(role.name) && (
+                  <button
+                    onClick={() => handleDeleteRole(role)}
+                    className="w-8 h-8 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg flex items-center justify-center transition-colors"
+                    title="Eliminar rol"
+                  >
+                    <FiTrash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-start justify-between mb-4 pr-20">
+                <div className="flex items-center space-x-3">
+                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                    role.name === 'admin' 
+                      ? 'bg-red-500/20' 
+                      : 'bg-green-500/20'
+                  }`}>
+                    <FiShield className={`w-6 h-6 ${
+                      role.name === 'admin' ? 'text-red-400' : 'text-green-400'
+                    }`} />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-bold text-white capitalize">{role.name}</h4>
+                    <p className="text-xs text-slate-500">ID: {role.id}</p>
+                    <p className="text-sm text-slate-400 mt-1">{role.description}</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
             <div className="space-y-3 mb-4">
               <div className="flex justify-between text-sm">
@@ -751,15 +816,16 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <button
-              onClick={() => handleManageRoleTools(role)}
-              className="w-full btn-primary flex items-center justify-center space-x-2"
-            >
-              <FiTool className="w-4 h-4" />
-              <span>Gestionar Herramientas</span>
-            </button>
-          </div>
-        ))}
+              <button
+                onClick={() => handleManageRoleTools(role)}
+                className="w-full btn-primary flex items-center justify-center space-x-2"
+              >
+                <FiTool className="w-4 h-4" />
+                <span>Gestionar Herramientas</span>
+              </button>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Summary */}
@@ -959,14 +1025,26 @@ const AdminDashboard = () => {
           role={roleToolsModal.role}
           onRoleUpdated={handleRoleUpdated}
         />
+        <RoleModal
+          isOpen={roleModal.isOpen}
+          onClose={() => setRoleModal({ isOpen: false, role: null })}
+          role={roleModal.role}
+          onRoleSaved={handleRoleSaved}
+        />
         <ConfirmModal
           isOpen={confirmModal.isOpen}
           onClose={() => setConfirmModal({ isOpen: false, user: null, action: null })}
           onConfirm={confirmDeleteUser}
-          title={confirmModal.action === 'deleteTool' ? 'Eliminar Herramienta' : 'Eliminar Usuario'}
+          title={
+            confirmModal.action === 'deleteTool' ? 'Eliminar Herramienta' :
+            confirmModal.action === 'deleteRole' ? 'Eliminar Rol' :
+            'Eliminar Usuario'
+          }
           message={
             confirmModal.action === 'deleteTool' 
               ? `¿Seguro que deseas eliminar la herramienta "${confirmModal.user?.name || ''}"? Esta acción no se puede deshacer.`
+              : confirmModal.action === 'deleteRole'
+              ? `¿Seguro que deseas eliminar el rol "${confirmModal.user?.name || ''}"? Esta acción no se puede deshacer y afectará a todos los usuarios con este rol.`
               : `¿Seguro que deseas eliminar al usuario "${confirmModal.user?.name || ''}"? Esta acción no se puede deshacer.`
           }
           confirmText="Eliminar"

@@ -173,6 +173,11 @@ export const adminAPI = {
   getAllRoles: () => api.get('/admin/roles'),
   assignToolsToRole: (roleId, toolIds) => 
     api.post(`/admin/roles/${roleId}/tools`, { toolIds }),
+  createRole: (roleData) => api.post('/roles', roleData),
+  updateRole: (id, roleData) => api.put(`/roles/${id}`, roleData),
+  deleteRole: (id) => api.delete(`/roles/${id}`),
+  getRole: (id) => api.get(`/roles/${id}`),
+  getRoleTools: (id) => api.get(`/roles/${id}/tools`),
   
   // Configuración
   setApiKey: (apiKey) => api.post('/admin/api-key', { apiKey }),

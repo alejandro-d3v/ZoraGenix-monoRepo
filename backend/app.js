@@ -9,6 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const imageRoutes = require('./routes/imageRoutes');
 const toolRoutes = require('./routes/toolRoutes');
+const roleRoutes = require('./routes/roleRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
 // Importar middlewares
@@ -84,6 +85,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/images', imageRoutes);
 app.use('/api/tools', toolRoutes);
+app.use('/api/roles', roleRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Ruta para manejar rutas no encontradas
