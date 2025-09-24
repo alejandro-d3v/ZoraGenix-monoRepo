@@ -4,7 +4,7 @@ import { FiSettings, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import clsx from 'clsx';
 import { useTool } from '../context/ToolContext';
 
-const ToolOptionsPanel = ({ className = '' }) => {
+const ToolOptionsPanel = ({ className = '', compact = false }) => {
   const { 
     selectedTools, 
     selectedOptions, 
@@ -159,23 +159,25 @@ const ToolOptionsPanel = ({ className = '' }) => {
   }
 
   return (
-    <div className={clsx('space-y-6', className)}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-nanoBlue-500 to-purple-500 rounded-lg flex items-center justify-center">
-            <FiSettings className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">
-              Configuración de Herramientas
-            </h3>
-            <p className="text-sm text-slate-400">
-              Ajusta las opciones para cada herramienta seleccionada
-            </p>
+    <div className={clsx(compact ? 'space-y-4' : 'space-y-6', className)}>
+      {/* Header - Solo mostrar en modo no compacto */}
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-nanoBlue-500 to-purple-500 rounded-lg flex items-center justify-center">
+              <FiSettings className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">
+                Configuración de Herramientas
+              </h3>
+              <p className="text-sm text-slate-400">
+                Ajusta las opciones para cada herramienta seleccionada
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Opciones por herramienta */}
       <div className="space-y-4">

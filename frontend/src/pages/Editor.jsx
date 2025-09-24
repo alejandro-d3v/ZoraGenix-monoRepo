@@ -6,10 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import { useTool } from '../context/ToolContext';
 import { imageAPI } from '../services/api';
 import toast from 'react-hot-toast';
+import '../styles/Editor.css';
 
 // Componentes
 import ToolPalette from '../components/ToolPalette';
 import ToolOptionsPanel from '../components/ToolOptionsPanel';
+import ToolConfigSidebar from '../components/ToolConfigSidebar';
 import ImageUploader from '../components/ImageUploader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GenerationProgress from '../components/GenerationProgress';
@@ -25,11 +27,21 @@ const Editor = () => {
   const [generationStep, setGenerationStep] = useState(1);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [userStats, setUserStats] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Cargar estadísticas del usuario
   useEffect(() => {
     loadUserStats();
   }, []);
+
+  // Abrir sidebar automáticamente cuando se seleccionen herramientas
+  useEffect(() => {
+    if (selectedTools.length > 0) {
+      setIsSidebarOpen(true);
+    } else {
+      setIsSidebarOpen(false);
+    }
+  }, [selectedTools.length]);
 
   const loadUserStats = async () => {
     try {
@@ -263,17 +275,15 @@ const Editor = () => {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="flex relative">
         {/* Sidebar - Tool Palette */}
         <div className="w-80 sidebar min-h-screen overflow-y-auto p-6">
           <ToolPalette />
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 p-6">
+        <div className={`flex-1 p-6 editor-main-content ${isSidebarOpen ? 'lg:mr-96' : ''}`}>
           <div className="max-w-4xl mx-auto space-y-6">
-            {/* Tool Options Panel - Inline */}
-            <ToolOptionsPanel />
 
             {/* Control Panel */}
             <div className="card-glass p-6">
@@ -281,32 +291,61 @@ const Editor = () => {
                 <h2 className="text-2xl font-bold text-white">
                   Panel de Control
                 </h2>
-                <div className="flex items-center space-x-4 text-sm text-slate-400">
-                  <span>Herramientas: {selectedTools.length}</span>
-                  <span>Modo: {generationMode.replace('_', ' ')}</span>
-                  <span>Imágenes: {uploadedImages.length}</span>
+                <div className="flex items-center space-x-4">
+                  {selectedTools.length > 0 && (
+                    <button
+                      onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                      className="btn-primary config-toggle-btn flex items-center space-x-2"
+                    >
+                      <FiSettings className="w-4 h-4" />
+                      <span className="hidden sm:inline">
+                        {isSidebarOpen ? 'Ocultar Config' : 'Configurar'}
+                      </span>
+                    </button>
+                  )}
+                  <div className="flex items-center space-x-4 text-sm text-slate-400">
+                    <span>Herramientas: {selectedTools.length}</span>
+                    <span>Modo: {generationMode.replace('_', ' ')}</span>
+                    <span>Imágenes: {uploadedImages.length}</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Tool Info */}
+              {/* Tool Info - Herramientas Seleccionadas */}
               {selectedTools.length > 0 ? (
-                <div className="bg-slate-800/50 rounded-lg p-4 mb-6">
-                  <h3 className="text-lg font-medium text-nanoBlue-400 mb-2">
-                    {selectedTools.length === 1 
-                      ? selectedTools[0].name 
-                      : `${selectedTools.length} herramientas combinadas`
-                    }
-                  </h3>
-                  <p className="text-slate-300 text-sm mb-3">
-                    {selectedTools.length === 1 
-                      ? selectedTools[0].description
-                      : `Combinando: ${selectedTools.map(t => t.name).join(', ')}`
-                    }
-                  </p>
-                  <div className="flex items-center space-x-4 text-xs text-slate-400">
+                <div className="tool-info-card rounded-lg p-4 mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium text-nanoBlue-400">
+                      Herramientas Seleccionadas
+                    </h3>
+                    <span className="text-xs text-slate-400">
+                      {selectedTools.length} herramienta{selectedTools.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  
+                  {/* Lista de herramientas con descripciones */}
+                  <div className="space-y-3 mb-4">
+                    {selectedTools.map((tool, index) => (
+                      <div key={tool.id} className="flex items-start space-x-3">
+                        <div className="w-6 h-6 bg-nanoBlue-500 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 mt-0.5 tool-selection-badge">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-white">
+                            {tool.name}
+                          </h4>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {tool.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="flex items-center justify-between text-xs text-slate-400 pt-3 border-t border-slate-700">
                     <span>Modo: {generationMode.replace('_', ' ')}</span>
                     <span>Imágenes: {uploadedImages.length}</span>
-                    <span>Opciones configuradas: {Object.keys(selectedOptions).length}</span>
+                    <span>Opciones: {Object.keys(selectedOptions).length}</span>
                   </div>
                 </div>
               ) : (
@@ -459,6 +498,12 @@ const Editor = () => {
             )}
           </div>
         </div>
+
+        {/* Tool Configuration Sidebar */}
+        <ToolConfigSidebar 
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
       </div>
 
       {/* Generation Progress Modal */}

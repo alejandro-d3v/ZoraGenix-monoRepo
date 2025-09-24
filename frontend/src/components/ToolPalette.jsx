@@ -96,7 +96,7 @@ const ToolPalette = ({ className = '' }) => {
       </div>
 
       {/* Grid de herramientas */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-3 gap-3">
         {tools.map((tool, index) => {
           const IconComponent = toolIcons[tool.id] || FiZap;
           const isSelected = isToolSelected(tool.id);
@@ -127,7 +127,7 @@ const ToolPalette = ({ className = '' }) => {
                 )} />
 
                 {/* Contenido */}
-                <div className="relative z-10 flex flex-col items-center space-y-3">
+                <div className="relative z-10 flex flex-col items-center space-y-2">
                   {/* Icono */}
                   <div className={clsx(
                     'w-12 h-12 rounded-lg flex items-center justify-center transition-all duration-300',
@@ -144,14 +144,11 @@ const ToolPalette = ({ className = '' }) => {
                   {/* Nombre */}
                   <div className="text-center">
                     <h3 className={clsx(
-                      'font-medium text-sm transition-colors',
+                      'font-medium text-sm transition-colors leading-tight',
                       isSelected ? 'text-nanoBlue-300' : 'text-slate-200'
                     )}>
                       {tool.name}
                     </h3>
-                    <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                      {tool.description}
-                    </p>
                   </div>
 
                   {/* Indicador de selección */}

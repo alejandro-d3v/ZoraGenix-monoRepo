@@ -1,0 +1,98 @@
+/* Editor Layout Improvements */
+
+/* Smooth transitions for sidebar */
+.editor-main-content {
+  transition: margin-right 0.3s ease-in-out;
+}
+
+/* Tool palette improvements */
+.tool-item {
+  background-color: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(51, 65, 85, 0.5);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tool-item:hover {
+  border-color: rgba(71, 85, 105, 0.7);
+  background-color: rgba(51, 65, 85, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px rgba(59, 130, 246, 0.3);
+}
+
+.tool-item.selected {
+  border-color: rgba(59, 130, 246, 0.7);
+  background-color: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+/* Sidebar animations */
+.config-sidebar {
+  backdrop-filter: blur(20px);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+/* Tool selection indicators */
+.tool-selection-badge {
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 1024px) {
+  .editor-main-content {
+    margin-right: 0 !important;
+  }
+}
+
+/* Tool info cards */
+.tool-info-card {
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.3) 0%, rgba(30, 41, 59, 0.5) 100%);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.tool-info-card:hover {
+  border-color: rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(51, 65, 85, 0.3) 100%);
+}
+
+/* Configuration button improvements */
+.config-toggle-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.config-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Sidebar overlay improvements */
+.sidebar-overlay {
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+/* Tool options styling */
+.tool-option-field {
+  background-color: rgba(30, 41, 59, 0.7);
+  border-color: rgba(71, 85, 105, 0.5);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.tool-option-field:focus {
+  border-color: rgba(59, 130, 246, 0.7);
+  background-color: rgba(51, 65, 85, 0.7);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
