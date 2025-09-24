@@ -16,7 +16,8 @@ import {
 } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { adminAPI } from '../services/api';
+import { adminAPI, toolAPI } from '../services/api';
+import clsx from 'clsx';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 
@@ -38,14 +39,14 @@ const AdminDashboard = () => {
     try {
       setIsLoading(true);
       
-      // Cargar estadísticas
-      const statsResponse = await adminAPI.getStats();
+      // Cargar estadísticas (dashboard)
+      const statsResponse = await adminAPI.getDashboard();
       if (statsResponse.data.success) {
         setStats(statsResponse.data.data.stats);
       }
 
       // Cargar usuarios
-      const usersResponse = await adminAPI.getUsers();
+      const usersResponse = await adminAPI.getAllUsers();
       if (usersResponse.data.success) {
         setUsers(usersResponse.data.data.users);
       }
@@ -57,7 +58,7 @@ const AdminDashboard = () => {
       }
 
       // Cargar herramientas
-      const toolsResponse = await adminAPI.getTools();
+      const toolsResponse = await toolAPI.getAllTools();
       if (toolsResponse.data.success) {
         setTools(toolsResponse.data.data.tools);
       }

@@ -12,7 +12,7 @@ npm run dev
 [FE] > vite
 [FE] 
 [FE] 
-[FE]   VITE v4.5.14  ready in 475 ms
+[FE]   VITE v4.5.14  ready in 353 ms
 [FE] 
 [FE]   ➜  Local:   http://localhost:5173/
 [FE]   ➜  Network: http://192.168.1.3:5173/
@@ -29,215 +29,87 @@ npm run dev
 [BE] 📚 API Base: http://localhost:5001/api
 [BE] 🔧 Entorno: development
 [BE] 🚀 ===================================
-[BE] Error ejecutando query: Error: Incorrect arguments to mysqld_stmt_execute
+[BE] Error ejecutando query: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i
+[BE]         JOIN users u ON i.user_id = u.id
+[BE]         ORDER BY i.create' at line 5
 [BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
 [BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:145:11)
-[BE]     at getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:32)
-[BE]     at Layer.handle [as handle_request] (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/layer.js:95:5)
-[BE]     at next (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/route.js:149:13)
-[BE]     at Route.dispatch (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/route.js:119:3)
-[BE]     at Layer.handle [as handle_request] (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/layer.js:95:5)
-[BE]     at /Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/index.js:284:15
-[BE]     at Function.process_params (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/index.js:346:12) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
+[BE]     at Image.findAll (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:229:28)
+[BE]     at getDashboard (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/adminController.js:48:40)
+[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+[BE]   code: 'ER_PARSE_ERROR',
+[BE]   errno: 1064,
 [BE]   sql: '\n' +
 [BE]     '        SELECT \n' +
+[BE]     '          i.*, \n' +
+[BE]     '          u.name as user_name, \n' +
 [BE]     '          u.email as user_email,\n' +
-[BE]     '          i.*\n' +
 [BE]     '        FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '        WHERE i.user_id = ?\n' +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
 [BE]     '        ORDER BY i.created_at DESC\n' +
-[BE]     '        LIMIT ? OFFSET ?\n' +
+[BE]     '        LIMIT 5 OFFSET 0\n' +
 [BE]     '      ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] Intentando con esquema antiguo...
-[BE] Error ejecutando query: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] Error en findByUserId: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] ❌ Error obteniendo imágenes del usuario: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
+[BE]   sqlState: '42000',
+[BE]   sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5"
 [BE] }
 [BE] Error capturado: {
-[BE]   message: 'Incorrect arguments to mysqld_stmt_execute',
-[BE]   stack: 'Error: Incorrect arguments to mysqld_stmt_execute\n' +
+[BE]   message: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5",
+[BE]   stack: "Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5\n" +
 [BE]     '    at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)\n' +
 [BE]     '    at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)\n' +
-[BE]     '    at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)\n' +
-[BE]     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
-[BE]     '    at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20)',
-[BE]   url: '/api/images?page=1&limit=1',
+[BE]     '    at Image.findAll (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:229:28)\n' +
+[BE]     '    at getDashboard (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/adminController.js:48:40)\n' +
+[BE]     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+[BE]   url: '/api/admin/dashboard',
 [BE]   method: 'GET',
-[BE]   timestamp: '2025-09-24T03:06:34.104Z'
+[BE]   timestamp: '2025-09-24T03:29:10.277Z'
 [BE] }
-[BE] Error de MySQL no manejado: ER_WRONG_ARGUMENTS
-[BE] Error ejecutando query: Error: Incorrect arguments to mysqld_stmt_execute
+[BE] Error de MySQL no manejado: ER_PARSE_ERROR
+[BE] Error ejecutando query: Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i
+[BE]         JOIN users u ON i.user_id = u.id
+[BE]         ORDER BY i.create' at line 5
 [BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
 [BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:145:11)
-[BE]     at getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:32)
-[BE]     at Layer.handle [as handle_request] (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/layer.js:95:5)
-[BE]     at next (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/route.js:149:13)
-[BE]     at Route.dispatch (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/route.js:119:3)
-[BE]     at Layer.handle [as handle_request] (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/layer.js:95:5)
-[BE]     at /Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/index.js:284:15
-[BE]     at Function.process_params (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/express/lib/router/index.js:346:12) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
+[BE]     at Image.findAll (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:229:28)
+[BE]     at getDashboard (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/adminController.js:48:40)
+[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+[BE]   code: 'ER_PARSE_ERROR',
+[BE]   errno: 1064,
 [BE]   sql: '\n' +
 [BE]     '        SELECT \n' +
+[BE]     '          i.*, \n' +
+[BE]     '          u.name as user_name, \n' +
 [BE]     '          u.email as user_email,\n' +
-[BE]     '          i.*\n' +
 [BE]     '        FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '        WHERE i.user_id = ?\n' +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
 [BE]     '        ORDER BY i.created_at DESC\n' +
-[BE]     '        LIMIT ? OFFSET ?\n' +
+[BE]     '        LIMIT 5 OFFSET 0\n' +
 [BE]     '      ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] Intentando con esquema antiguo...
-[BE] Error ejecutando query: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] Error en findByUserId: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
-[BE] }
-[BE] ❌ Error obteniendo imágenes del usuario: Error: Incorrect arguments to mysqld_stmt_execute
-[BE]     at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)
-[BE]     at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)
-[BE]     at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)
-[BE]     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
-[BE]     at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20) {
-[BE]   code: 'ER_WRONG_ARGUMENTS',
-[BE]   errno: 1210,
-[BE]   sql: '\n' +
-[BE]     '          SELECT \n' +
-[BE]     '            i.*,\n' +
-[BE]     '            u.name as user_name,\n' +
-[BE]     "            'Herramienta Desconocida' as tool_name\n" +
-[BE]     '          FROM images i\n' +
-[BE]     '          JOIN users u ON i.user_id = u.id\n' +
-[BE]     '          WHERE i.user_id = ?\n' +
-[BE]     '          ORDER BY i.created_at DESC\n' +
-[BE]     '          LIMIT ? OFFSET ?\n' +
-[BE]     '        ',
-[BE]   sqlState: 'HY000',
-[BE]   sqlMessage: 'Incorrect arguments to mysqld_stmt_execute'
+[BE]   sqlState: '42000',
+[BE]   sqlMessage: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5"
 [BE] }
 [BE] Error capturado: {
-[BE]   message: 'Incorrect arguments to mysqld_stmt_execute',
-[BE]   stack: 'Error: Incorrect arguments to mysqld_stmt_execute\n' +
+[BE]   message: "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5",
+[BE]   stack: "Error: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM images i\n" +
+[BE]     '        JOIN users u ON i.user_id = u.id\n' +
+[BE]     "        ORDER BY i.create' at line 5\n" +
 [BE]     '    at PromisePool.execute (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/node_modules/mysql2/lib/promise/pool.js:54:22)\n' +
 [BE]     '    at query (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/config/db.js:43:34)\n' +
-[BE]     '    at Image.findByUserId (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:185:11)\n' +
-[BE]     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
-[BE]     '    at async getUserImages (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/imageController.js:228:20)',
-[BE]   url: '/api/images?page=1&limit=1',
+[BE]     '    at Image.findAll (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/models/Image.js:229:28)\n' +
+[BE]     '    at getDashboard (/Volumes/SSD_ALEJANDRO_MAC/MAIN/DOCUMENTS/ALEJANDRO_DEV/REPOSITORIES/ZoraGeniX/backend/controllers/adminController.js:48:40)\n' +
+[BE]     '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+[BE]   url: '/api/admin/dashboard',
 [BE]   method: 'GET',
-[BE]   timestamp: '2025-09-24T03:06:34.126Z'
+[BE]   timestamp: '2025-09-24T03:29:10.289Z'
 [BE] }
-[BE] Error de MySQL no manejado: ER_WRONG_ARGUMENTS
+[BE] Error de MySQL no manejado: ER_PARSE_ERROR

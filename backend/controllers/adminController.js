@@ -36,7 +36,7 @@ class AdminController {
       const userStats = await User.getStats();
       
       // Obtener estadísticas de imágenes
-      const imageStats = await Image.getStats();
+      const imageStats = await Image.getGlobalStats();
       
       // Obtener estadísticas de herramientas
       const toolStats = await Tool.getUsageStats();
@@ -44,8 +44,8 @@ class AdminController {
       // Obtener configuración de la app
       const appConfig = await SystemConfig.getAppConfig();
 
-      // Obtener imágenes recientes
-      const recentImages = await Image.getRecent(5);
+      // Obtener imágenes recientes (usar findAll con límite)
+      const recentImages = await Image.findAll(5, 0);
 
       res.json({
         success: true,
@@ -53,7 +53,7 @@ class AdminController {
         data: {
           stats: {
             users: userStats,
-            images: imageStats.total,
+            images: imageStats.total_images,
             tools: toolStats
           },
           recent_images: recentImages,

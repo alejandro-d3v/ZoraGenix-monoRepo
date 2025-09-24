@@ -8,38 +8,28 @@ class Image {
     try {
       const {
         user_id,
-        tool_id,
-        original_prompt,
         image_url,
-        file_path,
-        file_size,
-        generation_metadata
+        prompt,
       } = imageData;
 
       // Intentar con el esquema nuevo primero
       try {
         const sql = `
           INSERT INTO images (
-            user_id, tool_id, original_prompt, image_url, 
-            file_path, file_size, generation_metadata
+            user_id, image_url, prompt
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?)
         `;
 
         const result = await query(sql, [
-          user_id, tool_id, original_prompt, image_url,
-          file_path, file_size, generation_metadata
+          user_id, image_url, prompt
         ]);
         
         return {
           id: result.insertId,
           user_id,
-          tool_id,
-          original_prompt,
           image_url,
-          file_path,
-          file_size,
-          generation_metadata,
+          prompt,
           created_at: new Date()
         };
       } catch (error) {
@@ -53,18 +43,14 @@ class Image {
         const result = await query(fallbackSql, [
           user_id, 
           image_url || '', 
-          original_prompt || ''
+          prompt || ''
         ]);
         
         return {
           id: result.insertId,
           user_id,
-          tool_id: null,
-          original_prompt: original_prompt || '',
           image_url: image_url || '',
-          file_path: '',
-          file_size: 0,
-          generation_metadata: '{}',
+          prompt: prompt || '',
           created_at: new Date()
         };
       }
@@ -83,11 +69,9 @@ class Image {
         SELECT 
           i.*, 
           u.name as user_name, 
-          u.email as user_email,
-          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
+          u.email as user_email
         FROM images i
         JOIN users u ON i.user_id = u.id
-        LEFT JOIN tools t ON i.tool_id = t.id
         WHERE i.id = ?
       `;
 
@@ -98,17 +82,12 @@ class Image {
       return {
         id: img.id,
         user_id: img.user_id,
-        tool_id: img.tool_id || null,
-        original_prompt: img.original_prompt || img.prompt || '',
         image_url: img.image_url || img.img_url || '',
-        file_path: img.file_path || '',
-        file_size: img.file_size || 0,
-        generation_metadata: img.generation_metadata || '{}',
+        prompt: img.prompt || '',
         created_at: img.created_at,
         updated_at: img.updated_at,
         user_name: img.user_name,
-        user_email: img.user_email,
-        tool_name: img.tool_name
+        user_email: img.user_email
       };
     } catch (error) {
       throw error;
@@ -150,16 +129,11 @@ class Image {
         const normalizedImages = images.map(img => ({
           id: img.id,
           user_id: img.user_id,
-          tool_id: img.tool_id || null,
-          original_prompt: img.original_prompt || img.prompt || '',
           image_url: img.image_url || img.img_url || '',
-          file_path: img.file_path || '',
-          file_size: img.file_size || 0,
-          generation_metadata: img.generation_metadata || '{}',
+          prompt: img.prompt || '',
           created_at: img.created_at,
           updated_at: img.updated_at,
-          user_name: img.user_name,
-          tool_name: img.tool_name
+          user_name: img.user_name
         }));
 
         return {
@@ -172,8 +146,7 @@ class Image {
         const fallbackSql = `
           SELECT 
             i.*,
-            u.name as user_name,
-            'Herramienta Desconocida' as tool_name
+            u.name as user_name
           FROM images i
           JOIN users u ON i.user_id = u.id
           WHERE i.user_id = ?
@@ -190,16 +163,11 @@ class Image {
         const normalizedImages = images.map(img => ({
           id: img.id,
           user_id: img.user_id,
-          tool_id: null,
-          original_prompt: img.prompt || '',
-          image_url: img.img_url || '',
-          file_path: '',
-          file_size: 0,
-          generation_metadata: '{}',
+          image_url: img.image_url || img.img_url || '',
+          prompt: img.prompt || '',
           created_at: img.created_at,
           updated_at: img.updated_at,
-          user_name: img.user_name,
-          tool_name: 'Herramienta Desconocida'
+          user_name: img.user_name
         }));
 
         return {
@@ -222,11 +190,9 @@ class Image {
         SELECT 
           i.*, 
           u.name as user_name, 
-          u.email as user_email,
-          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
+          u.email as user_email
         FROM images i
         JOIN users u ON i.user_id = u.id
-        LEFT JOIN tools t ON i.tool_id = t.id
         ORDER BY i.created_at DESC
         LIMIT ${Number(limit)} OFFSET ${Number(offset)}
       `;
@@ -237,17 +203,12 @@ class Image {
       return images.map(img => ({
         id: img.id,
         user_id: img.user_id,
-        tool_id: img.tool_id || null,
-        original_prompt: img.original_prompt || img.prompt || '',
         image_url: img.image_url || img.img_url || '',
-        file_path: img.file_path || '',
-        file_size: img.file_size || 0,
-        generation_metadata: img.generation_metadata || '{}',
+        prompt: img.prompt || '',
         created_at: img.created_at,
         updated_at: img.updated_at,
         user_name: img.user_name,
-        user_email: img.user_email,
-        tool_name: img.tool_name
+        user_email: img.user_email
       }));
     } catch (error) {
       throw error;
@@ -262,35 +223,30 @@ class Image {
       const sql = `
         SELECT 
           i.*, 
-          u.name as user_name,
-          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
+          u.name as user_name
         FROM images i
         JOIN users u ON i.user_id = u.id
-        LEFT JOIN tools t ON i.tool_id = t.id
         WHERE i.user_id = ? 
         AND (
-          COALESCE(i.original_prompt, i.prompt, '') LIKE ? OR
-          COALESCE(t.name, '') LIKE ?
+          COALESCE(i.original_prompt, i.prompt, '') LIKE ?
         )
         ORDER BY i.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${Number(limit)} OFFSET ${Number(offset)}
       `;
 
       const countSql = `
         SELECT COUNT(*) as total
         FROM images i
-        LEFT JOIN tools t ON i.tool_id = t.id
         WHERE i.user_id = ? 
         AND (
-          COALESCE(i.original_prompt, i.prompt, '') LIKE ? OR
-          COALESCE(t.name, '') LIKE ?
+          COALESCE(i.original_prompt, i.prompt, '') LIKE ?
         )
       `;
 
       const searchPattern = `%${searchTerm}%`;
       
       const [images, countResult] = await Promise.all([
-        query(sql, [userId, searchPattern, searchPattern, limit, offset]),
+        query(sql, [userId, searchPattern]),
         query(countSql, [userId, searchPattern, searchPattern])
       ]);
 
@@ -298,16 +254,11 @@ class Image {
       const normalizedImages = images.map(img => ({
         id: img.id,
         user_id: img.user_id,
-        tool_id: img.tool_id || null,
-        original_prompt: img.original_prompt || img.prompt || '',
         image_url: img.image_url || img.img_url || '',
-        file_path: img.file_path || '',
-        file_size: img.file_size || 0,
-        generation_metadata: img.generation_metadata || '{}',
+        prompt: img.prompt || '',
         created_at: img.created_at,
         updated_at: img.updated_at,
-        user_name: img.user_name,
-        tool_name: img.tool_name
+        user_name: img.user_name
       }));
 
       return {
@@ -340,7 +291,6 @@ class Image {
       const sql = `
         SELECT 
           COUNT(*) as total_images,
-          COALESCE(SUM(file_size), 0) as total_size,
           MIN(created_at) as first_image,
           MAX(created_at) as last_image
         FROM images 
@@ -350,7 +300,6 @@ class Image {
       const result = await query(sql, [userId]);
       return result[0] || {
         total_images: 0,
-        total_size: 0,
         first_image: null,
         last_image: null
       };
@@ -368,7 +317,6 @@ class Image {
         SELECT 
           COUNT(*) as total_images,
           COUNT(DISTINCT user_id) as total_users_with_images,
-          COALESCE(SUM(file_size), 0) as total_size,
           MIN(created_at) as first_image,
           MAX(created_at) as last_image
         FROM images
@@ -378,7 +326,6 @@ class Image {
       return result[0] || {
         total_images: 0,
         total_users_with_images: 0,
-        total_size: 0,
         first_image: null,
         last_image: null
       };
