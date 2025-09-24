@@ -12,6 +12,7 @@ import ToolPalette from '../components/ToolPalette';
 import ToolOptionsPanel from '../components/ToolOptionsPanel';
 import ImageUploader from '../components/ImageUploader';
 import LoadingSpinner from '../components/LoadingSpinner';
+import GenerationProgress from '../components/GenerationProgress';
 
 const Editor = () => {
   const { user, logout } = useAuth();
@@ -21,6 +22,7 @@ const Editor = () => {
   const [generationMode, setGenerationMode] = useState('text');
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState(1);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [userStats, setUserStats] = useState(null);
 
@@ -69,13 +71,16 @@ const Editor = () => {
       return;
     }
 
-    setIsGenerating(true);
-    setGeneratedImage(null);
-
     try {
-      // Construir prompt combinado si no hay prompt personalizado
-      let finalPrompt = customPrompt.trim();
-      if (!finalPrompt) {
+      setIsGenerating(true);
+      setGeneratedImage(null);
+      setGenerationStep(1);
+      
+      // Paso 1: Construir prompt final
+      let finalPrompt = '';
+      if (customPrompt.trim()) {
+        finalPrompt = customPrompt.trim();
+      } else {
         finalPrompt = await buildCombinedPrompt();
       }
 
@@ -84,21 +89,29 @@ const Editor = () => {
         return;
       }
 
+      setGenerationStep(2);
+
       // Preparar FormData
       const formData = new FormData();
       
-      // Usar la primera herramienta para compatibilidad con el backend
-      formData.append('toolId', selectedTools[0].id);
-      
-      // Combinar todas las opciones de todas las herramientas
+      // Combinar opciones de todas las herramientas activas
       const combinedOptions = {};
+      let primaryToolId = null;
+      
       selectedTools.forEach(tool => {
         const toolOptions = selectedOptions[tool.id] || {};
-        Object.keys(toolOptions).forEach(key => {
-          combinedOptions[`${tool.name}_${key}`] = toolOptions[key];
+        Object.entries(toolOptions).forEach(([key, value]) => {
+          if (value !== null && value !== undefined && value !== '') {
+            combinedOptions[`${tool.name}_${key}`] = value;
+            if (!primaryToolId) primaryToolId = tool.id; // Usar la primera herramienta como principal
+          }
         });
       });
       
+      // Enviar datos estructurados
+      if (primaryToolId) {
+        formData.append('toolId', primaryToolId);
+      }
       formData.append('selectedOptions', JSON.stringify(combinedOptions));
       formData.append('generationMode', generationMode);
       formData.append('customPrompt', finalPrompt);
@@ -106,6 +119,14 @@ const Editor = () => {
       // Agregar imágenes si las hay
       uploadedImages.forEach((imageObj) => {
         formData.append('images', imageObj.file);
+      });
+
+      console.log('📤 Enviando datos:', {
+        toolId: primaryToolId,
+        selectedOptions: combinedOptions,
+        generationMode,
+        customPrompt: finalPrompt,
+        imagesCount: uploadedImages.length
       });
 
       const response = await fetch('/api/images/generate', {
@@ -117,6 +138,8 @@ const Editor = () => {
       });
 
       const result = await response.json();
+
+      setGenerationStep(3);
 
       if (result.success) {
         setGeneratedImage(result.data.image);
@@ -377,9 +400,11 @@ const Editor = () => {
 
                 {isGenerating ? (
                   <div className="text-center py-12">
-                    <LoadingSpinner size="lg" text="Generando tu imagen con IA..." />
-                    <p className="text-slate-400 mt-4">
-                      Esto puede tomar unos momentos...
+                    <div className="w-16 h-16 bg-nanoBlue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FiZap className="w-8 h-8 text-nanoBlue-400 animate-pulse" />
+                    </div>
+                    <p className="text-slate-400">
+                      Procesando tu solicitud...
                     </p>
                   </div>
                 ) : generatedImage ? (
@@ -435,6 +460,12 @@ const Editor = () => {
           </div>
         </div>
       </div>
+
+      {/* Generation Progress Modal */}
+      <GenerationProgress 
+        isGenerating={isGenerating} 
+        currentStep={generationStep} 
+      />
     </div>
   );
 };

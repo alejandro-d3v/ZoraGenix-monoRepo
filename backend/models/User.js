@@ -106,6 +106,32 @@ class User {
   }
 
   /**
+   * Decrementar cuota de usuario
+   */
+  static async decrementQuota(userId, amount = 1) {
+    try {
+      const sql = 'UPDATE users SET quota_remaining = quota_remaining - ? WHERE id = ? AND quota_remaining >= ?';
+      const result = await query(sql, [amount, userId, amount]);
+      
+      if (result.affectedRows === 0) {
+        // Verificar si el usuario existe o si no tiene suficiente cuota
+        const user = await this.findById(userId);
+        if (!user) {
+          throw new Error('Usuario no encontrado');
+        }
+        if (user.quota_remaining < amount) {
+          throw new Error('Cuota insuficiente');
+        }
+        throw new Error('Error actualizando cuota');
+      }
+
+      return await this.findById(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * Actualizar contraseña de usuario
    */
   static async updatePassword(userId, newPassword) {

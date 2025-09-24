@@ -3,6 +3,57 @@ const Image = require('../models/Image');
 const User = require('../models/User');
 const Tool = require('../models/Tool');
 const { nanoBananaService } = require('../services/nanoBananaService');
+
+/**
+ * Construir prompt inteligente desde opciones seleccionadas
+ */
+const buildPromptFromOptions = (selectedOptions) => {
+  const parts = [];
+  
+  Object.entries(selectedOptions).forEach(([key, value]) => {
+    if (value && value !== '') {
+      // Separar el nombre de la herramienta del campo
+      const [toolName, fieldName] = key.includes('_') ? key.split('_') : [key, ''];
+      
+      if (toolName && fieldName) {
+        switch (toolName.toLowerCase()) {
+          case 'cambiar color':
+            parts.push(`cambiar el color de la ${fieldName} a ${value}`);
+            break;
+          case 'nueva pose':
+            if (fieldName === 'acción') {
+              parts.push(`realizar la acción de ${value}`);
+            } else if (fieldName === 'expresión') {
+              parts.push(`mostrar expresión ${value}`);
+            } else {
+              parts.push(`cambiar la pose con ${fieldName} ${value}`);
+            }
+            break;
+          case 'accesorios':
+            parts.push(`agregar ${value} en la ${fieldName}`);
+            break;
+          case 'maquillaje':
+            parts.push(`aplicar maquillaje en ${fieldName} con ${value}`);
+            break;
+          case 'peinado':
+            parts.push(`cambiar el peinado con ${fieldName} ${value}`);
+            break;
+          default:
+            parts.push(`${fieldName}: ${value}`);
+        }
+      } else {
+        parts.push(`${key}: ${value}`);
+      }
+    }
+  });
+  
+  if (parts.length === 0) {
+    return 'Editar la imagen manteniendo la calidad y coherencia visual';
+  }
+  
+  return parts.join(', ');
+};
+
 const { imageUtils } = require('../middlewares/uploadMiddleware');
 const path = require('path');
 
@@ -19,8 +70,17 @@ const generateImage = async (req, res, next) => {
 
     // Validar datos de entrada
     const schema = Joi.object({
-      toolId: Joi.number().integer().required(),
-      selectedOptions: Joi.object().default({}),
+      toolId: Joi.number().integer().optional(),
+      selectedOptions: Joi.alternatives().try(
+        Joi.object(),
+        Joi.string().custom((value, helpers) => {
+          try {
+            return JSON.parse(value);
+          } catch (error) {
+            return helpers.error('any.invalid');
+          }
+        })
+      ).default({}),
       customPrompt: Joi.string().allow('').optional(),
       generationMode: Joi.string().valid('text', 'single_image', 'multiple_images').default('text')
     });
@@ -35,6 +95,13 @@ const generateImage = async (req, res, next) => {
     }
 
     const { toolId, selectedOptions, customPrompt, generationMode } = value;
+    
+    console.log('📝 Datos recibidos:', {
+      toolId,
+      selectedOptions: typeof selectedOptions === 'object' ? selectedOptions : 'string',
+      customPrompt,
+      generationMode
+    });
 
     // Verificar cuota del usuario
     const user = await User.findById(userId);
@@ -53,31 +120,48 @@ const generateImage = async (req, res, next) => {
       });
     }
 
-    // Obtener herramienta
-    const tool = await Tool.findById(toolId);
-    if (!tool) {
-      return res.status(404).json({
-        success: false,
-        message: 'Herramienta no encontrada'
-      });
+    // Construir prompt inteligente
+    let finalPrompt = '';
+    
+    // Verificar si el prompt personalizado es genérico o incompleto
+    const isGenericPrompt = customPrompt && (
+      customPrompt.includes('agregar.') || 
+      customPrompt.includes('cambiar la pose con.') || 
+      customPrompt.includes('cambiar el color de') ||
+      customPrompt.trim().length < 20
+    );
+    
+    if (customPrompt && customPrompt.trim() && !isGenericPrompt) {
+      // Si hay prompt personalizado completo, usarlo
+      finalPrompt = customPrompt.trim();
+    } else if (toolId && Object.keys(selectedOptions).length > 0) {
+      // Si hay herramienta y opciones, construir prompt desde la herramienta
+      try {
+        const tool = await Tool.findById(toolId);
+        if (tool) {
+          finalPrompt = await Tool.buildPrompt(toolId, selectedOptions);
+        }
+      } catch (error) {
+        console.error('Error building prompt from tool:', error);
+      }
     }
-
-    // Construir prompt
-    let finalPrompt;
-    if (customPrompt) {
-      finalPrompt = customPrompt;
-    } else {
-      finalPrompt = await Tool.buildPrompt(toolId, selectedOptions);
+    
+    // Si no hay prompt o es genérico, construir uno desde las opciones
+    if (!finalPrompt || isGenericPrompt) {
+      if (Object.keys(selectedOptions).length > 0) {
+        const optionsPrompt = buildPromptFromOptions(selectedOptions);
+        finalPrompt = optionsPrompt;
+      }
     }
-
+    
+    // Si aún no hay prompt, usar uno por defecto
     if (!finalPrompt) {
-      return res.status(400).json({
-        success: false,
-        message: 'No se pudo construir el prompt'
-      });
+      finalPrompt = 'Editar la imagen manteniendo la calidad y coherencia visual';
     }
+    
+    console.log('🎯 Prompt final construido:', finalPrompt);
 
-    console.log(`🎨 Generando imagen para usuario ${userId} con herramienta ${tool.name}`);
+    console.log(`🎨 Generando imagen para usuario ${userId}`);
     console.log(`📝 Prompt: ${finalPrompt.substring(0, 200)}...`);
 
     let nanoBananaResult;
@@ -151,18 +235,8 @@ const generateImage = async (req, res, next) => {
     // Crear registro en base de datos
     const imageData = {
       user_id: userId,
-      tool_id: toolId,
-      original_prompt: finalPrompt,
       image_url: `/uploads/generated/${filename}`,
-      file_path: savedFile.relativePath,
-      file_size: savedFile.size,
-      generation_metadata: JSON.stringify({
-        tool_name: tool.name,
-        selected_options: selectedOptions,
-        generation_mode: generationMode,
-        input_images_count: req.processedImages ? req.processedImages.length : 0,
-        nano_banana_metadata: nanoBananaResult.metadata
-      })
+      prompt: finalPrompt
     };
 
     const newImage = await Image.create(imageData);
@@ -184,14 +258,11 @@ const generateImage = async (req, res, next) => {
           id: newImage.id,
           url: imageData.image_url,
           prompt: finalPrompt,
-          tool_name: tool.name,
           created_at: newImage.created_at,
-          file_size: savedFile.size,
-          generation_metadata: imageData.generation_metadata
+          file_size: savedFile.size
         },
         user: {
-          quota_remaining: updatedUser.quota_remaining,
-          quota_used: updatedUser.quota_used
+          quota_remaining: updatedUser.quota_remaining
         },
         nano_banana_response: {
           text: nanoBananaResult.text,

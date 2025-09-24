@@ -16,7 +16,7 @@ class Image {
       try {
         const sql = `
           INSERT INTO images (
-            user_id, image_url, prompt
+            user_id, img_url, prompt
           )
           VALUES (?, ?, ?)
         `;
