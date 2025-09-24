@@ -2,10 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-require('dotenv').config();
-
-// Importar middlewares
-const { errorHandler, notFoundHandler } = require('./middlewares/errorHandler');
+const path = require('path');
 
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
@@ -14,23 +11,36 @@ const imageRoutes = require('./routes/imageRoutes');
 const toolRoutes = require('./routes/toolRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
+// Importar middlewares
+const { errorHandler } = require('./middlewares/errorHandler');
+
 // Crear aplicación Express
 const app = express();
 
-// === MIDDLEWARES DE SEGURIDAD ===
-
-// Helmet para headers de seguridad
+// Configuración de seguridad
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      scriptSrc: ["'self'"],
+    },
+  },
 }));
 
-// CORS
-app.use(cors({
+// Configuración de CORS
+const corsOptions = {
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -38,36 +48,34 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // límite de requests por ventana
   message: {
     success: false,
-    message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.'
+    message: 'Demasiadas solicitudes desde esta IP, intenta de nuevo más tarde.',
+    error: 'RATE_LIMIT_EXCEEDED'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
 });
 
 app.use(limiter);
 
-// === MIDDLEWARES DE PARSING ===
+// Middlewares de parsing
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Parser de JSON
-app.use(express.json({ 
-  limit: '10mb' // Para imágenes en base64
+// Servir archivos estáticos (imágenes generadas)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  maxAge: '1d', // Cache por 1 día
+  etag: true,
+  lastModified: true
 }));
 
-// Parser de URL encoded
-app.use(express.urlencoded({ 
-  extended: true,
-  limit: '10mb'
-}));
-
-// === RUTAS ===
-
-// Ruta de salud del servidor
+// Ruta de health check
 app.get('/health', (req, res) => {
   res.json({
     success: true,
     message: 'SoraGemiX API está funcionando correctamente',
     timestamp: new Date().toISOString(),
-    version: '1.0.0'
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
   });
 });
 
@@ -78,12 +86,17 @@ app.use('/api/images', imageRoutes);
 app.use('/api/tools', toolRoutes);
 app.use('/api/admin', adminRoutes);
 
-// === MANEJO DE ERRORES ===
+// Ruta para manejar rutas no encontradas
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Ruta no encontrada',
+    path: req.originalUrl,
+    method: req.method
+  });
+});
 
-// Middleware para rutas no encontradas
-app.use(notFoundHandler);
-
-// Middleware de manejo de errores
+// Middleware de manejo de errores (debe ir al final)
 app.use(errorHandler);
 
 module.exports = app;

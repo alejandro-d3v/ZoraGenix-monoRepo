@@ -422,7 +422,7 @@ INSERT INTO role_tools (role_id, tool_id) VALUES
 (2, 8);  -- Quitar Elemento
 
 INSERT INTO system_config (config_key, config_value) VALUES 
-('nano_api_key', 'AIzaSyDNnmT8iY0a-tTjiL704MI0gYZCf1t4_P0'),
+('nano_api_key', '****'),
 ('app_name', 'ZoraGenix'),
 ('app_version', '1.0.0');
 

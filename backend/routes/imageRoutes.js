@@ -1,46 +1,81 @@
 const express = require('express');
-const ImageController = require('../controllers/imageController');
+const router = express.Router();
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { quotaMiddleware } = require('../middlewares/quotaMiddleware');
+const { 
+  multipleImages, 
+  handleMulterError, 
+  processUploadedFiles, 
+  cleanupTempFiles 
+} = require('../middlewares/uploadMiddleware');
+const {
+  generateImage,
+  getUserImages,
+  getImage,
+  deleteImage,
+  searchImages,
+  downloadImage,
+  getUserImageStats
+} = require('../controllers/imageController');
 
-const router = express.Router();
+/**
+ * Rutas para manejo de imágenes
+ * Todas las rutas requieren autenticación
+ */
 
-// Todas las rutas requieren autenticación
+// Middleware común para todas las rutas
 router.use(authMiddleware);
 
 /**
- * @route   POST /images/generate
- * @desc    Generar imagen con IA
- * @access  Private (requiere cuota)
+ * POST /api/images/generate
+ * Generar nueva imagen usando Nano-Banana
+ * Soporta múltiples modos: texto, imagen única, múltiples imágenes
  */
-router.post('/generate', quotaMiddleware, ImageController.generateImage);
+router.post('/generate',
+  quotaMiddleware, // Verificar cuota antes de procesar
+  multipleImages, // Manejar archivos subidos (hasta 5 imágenes)
+  handleMulterError, // Manejar errores de multer
+  processUploadedFiles, // Convertir archivos a base64
+  cleanupTempFiles, // Limpiar archivos temporales después
+  generateImage
+);
 
 /**
- * @route   GET /images
- * @desc    Obtener imágenes del usuario
- * @access  Private
+ * GET /api/images
+ * Obtener imágenes del usuario con paginación
+ * Query params: page, limit
  */
-router.get('/', ImageController.getUserImages);
+router.get('/', getUserImages);
 
 /**
- * @route   GET /images/search
- * @desc    Buscar imágenes por prompt
- * @access  Private
+ * GET /api/images/search
+ * Buscar imágenes por prompt
+ * Query params: q (query), page, limit
  */
-router.get('/search', ImageController.searchImages);
+router.get('/search', searchImages);
 
 /**
- * @route   GET /images/:id
- * @desc    Obtener imagen específica
- * @access  Private
+ * GET /api/images/stats
+ * Obtener estadísticas de imágenes del usuario
  */
-router.get('/:id', ImageController.getImage);
+router.get('/stats', getUserImageStats);
 
 /**
- * @route   DELETE /images/:id
- * @desc    Eliminar imagen
- * @access  Private
+ * GET /api/images/:id
+ * Obtener imagen específica por ID
  */
-router.delete('/:id', ImageController.deleteImage);
+router.get('/:id', getImage);
+
+/**
+ * GET /api/images/:id/download
+ * Descargar imagen específica
+ */
+router.get('/:id/download', downloadImage);
+
+/**
+ * DELETE /api/images/:id
+ * Eliminar imagen específica
+ */
+router.delete('/:id', deleteImage);
 
 module.exports = router;

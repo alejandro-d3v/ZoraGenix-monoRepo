@@ -4,23 +4,72 @@ class Image {
   /**
    * Crear una nueva imagen
    */
-  static async create({ user_id, img_url, prompt }) {
+  static async create(imageData) {
     try {
-      const sql = `
-        INSERT INTO images (user_id, img_url, prompt)
-        VALUES (?, ?, ?)
-      `;
-
-      const result = await query(sql, [user_id, img_url, prompt]);
-      
-      return {
-        id: result.insertId,
+      const {
         user_id,
-        img_url,
-        prompt,
-        created_at: new Date()
-      };
+        tool_id,
+        original_prompt,
+        image_url,
+        file_path,
+        file_size,
+        generation_metadata
+      } = imageData;
+
+      // Intentar con el esquema nuevo primero
+      try {
+        const sql = `
+          INSERT INTO images (
+            user_id, tool_id, original_prompt, image_url, 
+            file_path, file_size, generation_metadata
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const result = await query(sql, [
+          user_id, tool_id, original_prompt, image_url,
+          file_path, file_size, generation_metadata
+        ]);
+        
+        return {
+          id: result.insertId,
+          user_id,
+          tool_id,
+          original_prompt,
+          image_url,
+          file_path,
+          file_size,
+          generation_metadata,
+          created_at: new Date()
+        };
+      } catch (error) {
+        // Si falla, usar el esquema antiguo
+        console.log('Usando esquema antiguo para crear imagen...');
+        const fallbackSql = `
+          INSERT INTO images (user_id, img_url, prompt)
+          VALUES (?, ?, ?)
+        `;
+
+        const result = await query(fallbackSql, [
+          user_id, 
+          image_url || '', 
+          original_prompt || ''
+        ]);
+        
+        return {
+          id: result.insertId,
+          user_id,
+          tool_id: null,
+          original_prompt: original_prompt || '',
+          image_url: image_url || '',
+          file_path: '',
+          file_size: 0,
+          generation_metadata: '{}',
+          created_at: new Date()
+        };
+      }
     } catch (error) {
+      console.error('Error en create:', error);
       throw error;
     }
   }
@@ -31,14 +80,36 @@ class Image {
   static async findById(id) {
     try {
       const sql = `
-        SELECT i.*, u.name as user_name, u.email as user_email
+        SELECT 
+          i.*, 
+          u.name as user_name, 
+          u.email as user_email,
+          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
         FROM images i
         JOIN users u ON i.user_id = u.id
+        LEFT JOIN tools t ON i.tool_id = t.id
         WHERE i.id = ?
       `;
 
       const images = await query(sql, [id]);
-      return images[0] || null;
+      if (images.length === 0) return null;
+
+      const img = images[0];
+      return {
+        id: img.id,
+        user_id: img.user_id,
+        tool_id: img.tool_id || null,
+        original_prompt: img.original_prompt || img.prompt || '',
+        image_url: img.image_url || img.img_url || '',
+        file_path: img.file_path || '',
+        file_size: img.file_size || 0,
+        generation_metadata: img.generation_metadata || '{}',
+        created_at: img.created_at,
+        updated_at: img.updated_at,
+        user_name: img.user_name,
+        user_email: img.user_email,
+        tool_name: img.tool_name
+      };
     } catch (error) {
       throw error;
     }
@@ -49,17 +120,95 @@ class Image {
    */
   static async findByUserId(userId, limit = 50, offset = 0) {
     try {
+      // Consulta compatible con ambas versiones del esquema
       const sql = `
-        SELECT i.*, u.name as user_name
+        SELECT 
+          u.email as user_email,
+          i.*
         FROM images i
-        JOIN users u ON i.user_id = u.id
+          JOIN users u ON i.user_id = u.id
         WHERE i.user_id = ?
         ORDER BY i.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${Number(limit)} OFFSET ${Number(offset)}
       `;
 
-      return await query(sql, [userId, limit, offset]);
+      // Consulta para obtener el total
+      const countSql = `
+        SELECT
+          COUNT(*) as total
+        FROM images i
+        WHERE i.user_id = ?
+      `;
+
+      try {
+        const [images, countResult] = await Promise.all([
+          query(sql, [userId]),
+          query(countSql, [userId])
+        ]);
+
+        // Normalizar los datos para compatibilidad
+        const normalizedImages = images.map(img => ({
+          id: img.id,
+          user_id: img.user_id,
+          tool_id: img.tool_id || null,
+          original_prompt: img.original_prompt || img.prompt || '',
+          image_url: img.image_url || img.img_url || '',
+          file_path: img.file_path || '',
+          file_size: img.file_size || 0,
+          generation_metadata: img.generation_metadata || '{}',
+          created_at: img.created_at,
+          updated_at: img.updated_at,
+          user_name: img.user_name,
+          tool_name: img.tool_name
+        }));
+
+        return {
+          images: normalizedImages,
+          total: countResult[0].total
+        };
+      } catch (error) {
+        // Si falla con las nuevas columnas, intentar con el esquema antiguo
+        console.log('Intentando con esquema antiguo...');
+        const fallbackSql = `
+          SELECT 
+            i.*,
+            u.name as user_name,
+            'Herramienta Desconocida' as tool_name
+          FROM images i
+          JOIN users u ON i.user_id = u.id
+          WHERE i.user_id = ?
+          ORDER BY i.created_at DESC
+          LIMIT ${Number(limit)} OFFSET ${Number(offset)}
+        `;
+
+        const [images, countResult] = await Promise.all([
+          query(fallbackSql, [userId]),
+          query(countSql, [userId])
+        ]);
+
+        // Normalizar para el esquema antiguo
+        const normalizedImages = images.map(img => ({
+          id: img.id,
+          user_id: img.user_id,
+          tool_id: null,
+          original_prompt: img.prompt || '',
+          image_url: img.img_url || '',
+          file_path: '',
+          file_size: 0,
+          generation_metadata: '{}',
+          created_at: img.created_at,
+          updated_at: img.updated_at,
+          user_name: img.user_name,
+          tool_name: 'Herramienta Desconocida'
+        }));
+
+        return {
+          images: normalizedImages,
+          total: countResult[0].total
+        };
+      }
     } catch (error) {
+      console.error('Error en findByUserId:', error);
       throw error;
     }
   }
@@ -70,42 +219,101 @@ class Image {
   static async findAll(limit = 100, offset = 0) {
     try {
       const sql = `
-        SELECT i.*, u.name as user_name, u.email as user_email
+        SELECT 
+          i.*, 
+          u.name as user_name, 
+          u.email as user_email,
+          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
         FROM images i
         JOIN users u ON i.user_id = u.id
+        LEFT JOIN tools t ON i.tool_id = t.id
         ORDER BY i.created_at DESC
-        LIMIT ? OFFSET ?
+        LIMIT ${Number(limit)} OFFSET ${Number(offset)}
       `;
 
-      return await query(sql, [limit, offset]);
+      const images = await query(sql);
+      
+      // Normalizar los datos
+      return images.map(img => ({
+        id: img.id,
+        user_id: img.user_id,
+        tool_id: img.tool_id || null,
+        original_prompt: img.original_prompt || img.prompt || '',
+        image_url: img.image_url || img.img_url || '',
+        file_path: img.file_path || '',
+        file_size: img.file_size || 0,
+        generation_metadata: img.generation_metadata || '{}',
+        created_at: img.created_at,
+        updated_at: img.updated_at,
+        user_name: img.user_name,
+        user_email: img.user_email,
+        tool_name: img.tool_name
+      }));
     } catch (error) {
       throw error;
     }
   }
 
   /**
-   * Buscar imágenes por prompt (búsqueda)
+   * Buscar imágenes por prompt
    */
-  static async searchByPrompt(searchTerm, userId = null, limit = 50, offset = 0) {
+  static async searchByPrompt(userId, searchTerm, limit = 50, offset = 0) {
     try {
-      let sql = `
-        SELECT i.*, u.name as user_name, u.email as user_email
+      const sql = `
+        SELECT 
+          i.*, 
+          u.name as user_name,
+          COALESCE(t.name, 'Herramienta Desconocida') as tool_name
         FROM images i
         JOIN users u ON i.user_id = u.id
-        WHERE i.prompt LIKE ?
+        LEFT JOIN tools t ON i.tool_id = t.id
+        WHERE i.user_id = ? 
+        AND (
+          COALESCE(i.original_prompt, i.prompt, '') LIKE ? OR
+          COALESCE(t.name, '') LIKE ?
+        )
+        ORDER BY i.created_at DESC
+        LIMIT ? OFFSET ?
       `;
+
+      const countSql = `
+        SELECT COUNT(*) as total
+        FROM images i
+        LEFT JOIN tools t ON i.tool_id = t.id
+        WHERE i.user_id = ? 
+        AND (
+          COALESCE(i.original_prompt, i.prompt, '') LIKE ? OR
+          COALESCE(t.name, '') LIKE ?
+        )
+      `;
+
+      const searchPattern = `%${searchTerm}%`;
       
-      const params = [`%${searchTerm}%`];
+      const [images, countResult] = await Promise.all([
+        query(sql, [userId, searchPattern, searchPattern, limit, offset]),
+        query(countSql, [userId, searchPattern, searchPattern])
+      ]);
 
-      if (userId) {
-        sql += ' AND i.user_id = ?';
-        params.push(userId);
-      }
+      // Normalizar los datos
+      const normalizedImages = images.map(img => ({
+        id: img.id,
+        user_id: img.user_id,
+        tool_id: img.tool_id || null,
+        original_prompt: img.original_prompt || img.prompt || '',
+        image_url: img.image_url || img.img_url || '',
+        file_path: img.file_path || '',
+        file_size: img.file_size || 0,
+        generation_metadata: img.generation_metadata || '{}',
+        created_at: img.created_at,
+        updated_at: img.updated_at,
+        user_name: img.user_name,
+        tool_name: img.tool_name
+      }));
 
-      sql += ' ORDER BY i.created_at DESC LIMIT ? OFFSET ?';
-      params.push(limit, offset);
-
-      return await query(sql, params);
+      return {
+        images: normalizedImages,
+        total: countResult[0].total
+      };
     } catch (error) {
       throw error;
     }
@@ -114,18 +322,10 @@ class Image {
   /**
    * Eliminar imagen
    */
-  static async delete(id, userId = null) {
+  static async delete(id) {
     try {
-      let sql = 'DELETE FROM images WHERE id = ?';
-      const params = [id];
-
-      // Si se especifica userId, solo permitir eliminar imágenes propias
-      if (userId) {
-        sql += ' AND user_id = ?';
-        params.push(userId);
-      }
-
-      const result = await query(sql, params);
+      const sql = 'DELETE FROM images WHERE id = ?';
+      const result = await query(sql, [id]);
       return result.affectedRows > 0;
     } catch (error) {
       throw error;
@@ -133,37 +333,26 @@ class Image {
   }
 
   /**
-   * Obtener estadísticas de imágenes
+   * Obtener estadísticas de un usuario
    */
-  static async getStats() {
+  static async getUserStats(userId) {
     try {
       const sql = `
         SELECT 
           COUNT(*) as total_images,
-          COUNT(DISTINCT user_id) as users_with_images,
-          DATE(created_at) as date,
-          COUNT(*) as daily_count
-        FROM images
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY date DESC
+          COALESCE(SUM(file_size), 0) as total_size,
+          MIN(created_at) as first_image,
+          MAX(created_at) as last_image
+        FROM images 
+        WHERE user_id = ?
       `;
 
-      const dailyStats = await query(sql);
-
-      const totalSql = `
-        SELECT 
-          COUNT(*) as total_images,
-          COUNT(DISTINCT user_id) as users_with_images,
-          AVG(CHAR_LENGTH(prompt)) as avg_prompt_length
-        FROM images
-      `;
-
-      const totalStats = await query(totalSql);
-
-      return {
-        total: totalStats[0],
-        daily: dailyStats
+      const result = await query(sql, [userId]);
+      return result[0] || {
+        total_images: 0,
+        total_size: 0,
+        first_image: null,
+        last_image: null
       };
     } catch (error) {
       throw error;
@@ -171,59 +360,28 @@ class Image {
   }
 
   /**
-   * Obtener imágenes recientes
+   * Obtener estadísticas generales (para admin)
    */
-  static async getRecent(limit = 10) {
+  static async getGlobalStats() {
     try {
       const sql = `
-        SELECT i.*, u.name as user_name
-        FROM images i
-        JOIN users u ON i.user_id = u.id
-        ORDER BY i.created_at DESC
-        LIMIT ?
+        SELECT 
+          COUNT(*) as total_images,
+          COUNT(DISTINCT user_id) as total_users_with_images,
+          COALESCE(SUM(file_size), 0) as total_size,
+          MIN(created_at) as first_image,
+          MAX(created_at) as last_image
+        FROM images
       `;
 
-      return await query(sql, [limit]);
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Contar imágenes de un usuario
-   */
-  static async countByUserId(userId) {
-    try {
-      const sql = 'SELECT COUNT(*) as count FROM images WHERE user_id = ?';
-      const result = await query(sql, [userId]);
-      return result[0].count;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * Obtener imágenes por rango de fechas
-   */
-  static async findByDateRange(startDate, endDate, userId = null) {
-    try {
-      let sql = `
-        SELECT i.*, u.name as user_name, u.email as user_email
-        FROM images i
-        JOIN users u ON i.user_id = u.id
-        WHERE i.created_at BETWEEN ? AND ?
-      `;
-      
-      const params = [startDate, endDate];
-
-      if (userId) {
-        sql += ' AND i.user_id = ?';
-        params.push(userId);
-      }
-
-      sql += ' ORDER BY i.created_at DESC';
-
-      return await query(sql, params);
+      const result = await query(sql);
+      return result[0] || {
+        total_images: 0,
+        total_users_with_images: 0,
+        total_size: 0,
+        first_image: null,
+        last_image: null
+      };
     } catch (error) {
       throw error;
     }
