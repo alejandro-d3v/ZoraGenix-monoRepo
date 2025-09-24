@@ -55,39 +55,6 @@ const ToolConfigSidebar = ({ isOpen, onClose }) => {
 
             {/* Content */}
             <div className="p-4 space-y-6">
-              {/* Selected Tools Info */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <FiInfo className="w-4 h-4 text-nanoBlue-400" />
-                  <h4 className="text-sm font-medium text-nanoBlue-400">
-                    Herramientas Seleccionadas
-                  </h4>
-                </div>
-                
-                <div className="space-y-2">
-                  {selectedTools.map((tool, index) => (
-                    <div
-                      key={tool.id}
-                      className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-6 h-6 bg-nanoBlue-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h5 className="text-sm font-medium text-white truncate">
-                            {tool.name}
-                          </h5>
-                          <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-                            {tool.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Tool Options Panel */}
               <div className="space-y-3">
                 <div className="flex items-center space-x-2">

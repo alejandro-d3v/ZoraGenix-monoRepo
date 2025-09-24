@@ -127,6 +127,7 @@ const ToolModal = ({ isOpen, onClose, tool = null, onToolSaved }) => {
       
       const toolData = {
         ...formData,
+        is_active: formData.is_active ? true : false,
         custom_config: JSON.parse(configText)
       };
       
@@ -178,7 +179,7 @@ const ToolModal = ({ isOpen, onClose, tool = null, onToolSaved }) => {
         example = `{
   "name": "estilo",
   "type": "select",
-  "prompt": "con estilo \\{\\{ choice \\}\\}",
+  "prompt": "con estilo \\\\{\\\\{ choice \\\\}\\\\}",
   "choices": ["natural", "dramático", "vintage"]
 }`;
         break;
@@ -186,7 +187,7 @@ const ToolModal = ({ isOpen, onClose, tool = null, onToolSaved }) => {
         example = `{
   "name": "color",
   "type": "color",
-  "prompt": "de color \\{\\{ color \\}\\}",
+  "prompt": "de color \\\\{\\\\{ color \\\\}\\\\}",
   "choices": ["rojo", "azul", "verde"]
 }`;
         break;
@@ -194,14 +195,14 @@ const ToolModal = ({ isOpen, onClose, tool = null, onToolSaved }) => {
         example = `{
   "name": "detalle",
   "type": "text",
-  "prompt": "con detalle \\{\\{ value \\}\\}"
+  "prompt": "con detalle \\\\{\\\\{ value \\\\}\\\\}"
 }`;
         break;
       case 'range':
         example = `{
   "name": "intensidad",
   "type": "range",
-  "prompt": "con intensidad \\{\\{ value \\}\\}",
+  "prompt": "con intensidad \\\\{\\\\{ value \\\\}\\\\}",
   "min": 1,
   "max": 10,
   "default": 5

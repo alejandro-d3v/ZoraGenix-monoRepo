@@ -23,8 +23,6 @@ const Gallery = () => {
   const { user } = useAuth();
   const [images, setImages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -146,7 +144,7 @@ const Gallery = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <Link to="/editor" className="btn-ghost">
+              <Link to="/editor" className="btn-ghost flex items-center space-x-2">
                 <FiChevronLeft className="w-4 h-4 mr-2" />
                 Volver al Editor
               </Link>
@@ -178,43 +176,6 @@ const Gallery = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search Bar */}
-        <div className="mb-8">
-          <div className="max-w-md mx-auto">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                placeholder="Buscar por prompt o descripción..."
-                className="input-primary pl-10 pr-4 w-full"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    loadImages();
-                  }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
-                >
-                  <FiX className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={() => handleSearch()}
-                disabled={isSearching}
-                className="btn-primary px-6"
-              >
-                {isSearching ? 'Buscando...' : 'Buscar'}
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Loading */}
         {isLoading && (
           <div className="text-center py-12">
@@ -407,18 +368,8 @@ const Gallery = () => {
                           <span className="text-white">#{selectedImage.id}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-slate-400">Tamaño:</span>
-                          <span className="text-white">
-                            {selectedImage.file_size ? Math.round(selectedImage.file_size / 1024) : '?'} KB
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
                           <span className="text-slate-400">Creada:</span>
                           <span className="text-white">{formatDate(selectedImage.created_at)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-slate-400">Usuario:</span>
-                          <span className="text-white">{selectedImage.user_name || 'Usuario'}</span>
                         </div>
                       </div>
                     </div>

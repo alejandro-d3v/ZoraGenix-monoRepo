@@ -36,7 +36,7 @@ const AdminDashboard = () => {
   const [images, setImages] = useState([]);
   const [tools, setTools] = useState([]);
   const [systemConfig, setSystemConfig] = useState({});
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('users');
   const [isLoading, setIsLoading] = useState(true);
   
   // Modal states
@@ -273,12 +273,12 @@ const AdminDashboard = () => {
   };
 
   const tabs = [
-    { id: 'dashboard', name: 'Dashboard', icon: FiUsers },
+    // { id: 'dashboard', name: 'Dashboard', icon: FiUsers },
     { id: 'users', name: 'Usuarios', icon: FiUsers },
-    { id: 'images', name: 'Imágenes', icon: FiImage },
+    // { id: 'images', name: 'Imágenes', icon: FiImage },
     { id: 'tools', name: 'Herramientas', icon: FiTool },
     { id: 'roles', name: 'Roles', icon: FiShield },
-    { id: 'config', name: 'Configuración', icon: FiSettings }
+    // { id: 'config', name: 'Configuración', icon: FiSettings }
   ];
 
   const renderDashboard = () => (
@@ -413,8 +413,9 @@ const AdminDashboard = () => {
             className="input-primary pl-10 pr-8"
           >
             <option value="all">Todos los roles</option>
-            <option value="admin">Administradores</option>
-            <option value="user">Usuarios</option>
+            {roles.map(role => (
+              <option key={role.id} value={role.name}>{role.name}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -759,7 +760,7 @@ const AdminDashboard = () => {
                 >
                   <FiEdit className="w-4 h-4" />
                 </button>
-                {!['admin', 'user'].includes(role.name) && (
+                {!['admin'].includes(role.name) && (
                   <button
                     onClick={() => handleDeleteRole(role)}
                     className="w-8 h-8 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg flex items-center justify-center transition-colors"
@@ -789,40 +790,41 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-            <div className="space-y-3 mb-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-slate-400">Herramientas asignadas:</span>
-                <span className="text-white font-medium">
-                  {role.tools ? role.tools.length : 0} / {tools.length}
-                </span>
-              </div>
-              
-              {role.tools && role.tools.length > 0 && (
-                <div className="flex flex-wrap gap-1">
-                  {role.tools.slice(0, 3).map(tool => (
-                    <span
-                      key={tool.id}
-                      className="px-2 py-1 text-xs bg-nanoBlue-500/20 text-nanoBlue-400 rounded"
-                    >
-                      {tool.name}
-                    </span>
-                  ))}
-                  {role.tools.length > 3 && (
-                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-400 rounded">
-                      +{role.tools.length - 3} más
-                    </span>
-                  )}
+              <div className="space-y-3 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Herramientas asignadas:</span>
+                  <span className="text-white font-medium">
+                    {role.name === 'admin' ? tools.length : (role.tools ? role.tools.length : 0)} / {tools.length}
+                  </span>
                 </div>
-              )}
-            </div>
+                {role.name !== 'admin' && role.tools && role.tools.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {role.tools.slice(0, 3).map(tool => (
+                      <span
+                        key={tool.id}
+                        className="px-2 py-1 text-xs bg-nanoBlue-500/20 text-nanoBlue-400 rounded"
+                      >
+                        {tool.name}
+                      </span>
+                    ))}
+                    {role.tools.length > 3 && (
+                      <span className="px-2 py-1 text-xs bg-slate-700 text-slate-400 rounded">
+                        +{role.tools.length - 3} más
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
 
-              <button
-                onClick={() => handleManageRoleTools(role)}
-                className="w-full btn-primary flex items-center justify-center space-x-2"
-              >
-                <FiTool className="w-4 h-4" />
-                <span>Gestionar Herramientas</span>
-              </button>
+              {role.name !== 'admin' && (
+                <button
+                  onClick={() => handleManageRoleTools(role)}
+                  className="w-full btn-primary flex items-center justify-center space-x-2"
+                >
+                  <FiTool className="w-4 h-4" />
+                  <span>Gestionar Herramientas</span>
+                </button>
+              )}
             </div>
           ))
         )}

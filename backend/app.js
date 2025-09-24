@@ -43,7 +43,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Rate limiting
+// Rate limiting (configurable)
+const disableRateLimit = (process.env.DISABLE_RATE_LIMIT || '').toLowerCase() === 'true';
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutos
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // límite de requests por ventana
@@ -56,7 +57,11 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(limiter);
+if (!disableRateLimit) {
+  app.use(limiter);
+} else {
+  console.log('⏩ Rate limit deshabilitado (DISABLE_RATE_LIMIT=true)');
+}
 
 // Middlewares de parsing
 app.use(express.json({ limit: '10mb' }));

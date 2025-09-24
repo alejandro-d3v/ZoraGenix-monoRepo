@@ -42,21 +42,6 @@ const ToolPalette = ({ className = '' }) => {
     11: FiLayers      // Combinar Imágenes
   };
 
-  // Colores para cada herramienta
-  const toolColors = {
-    1: 'from-pink-500 to-rose-500',
-    2: 'from-purple-500 to-pink-500',
-    3: 'from-amber-500 to-orange-500',
-    4: 'from-blue-500 to-cyan-500',
-    5: 'from-green-500 to-emerald-500',
-    6: 'from-indigo-500 to-purple-500',
-    7: 'from-yellow-500 to-amber-500',
-    8: 'from-red-500 to-pink-500',
-    9: 'from-teal-500 to-cyan-500',
-    10: 'from-sky-500 to-blue-500',
-    11: 'from-violet-500 to-purple-500'
-  };
-
   if (isLoading) {
     return (
       <div className={clsx('p-6', className)}>
@@ -75,7 +60,7 @@ const ToolPalette = ({ className = '' }) => {
   return (
     <div className={clsx('space-y-6', className)}>
       {/* Header con contador y botón limpiar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white mb-2">
             Herramientas de Edición
@@ -84,6 +69,7 @@ const ToolPalette = ({ className = '' }) => {
             Selecciona múltiples herramientas para combinar efectos
           </p>
         </div>
+
         {selectedTools.length > 0 && (
           <button
             onClick={clearSelection}
@@ -100,7 +86,7 @@ const ToolPalette = ({ className = '' }) => {
         {tools.map((tool, index) => {
           const IconComponent = toolIcons[tool.id] || FiZap;
           const isSelected = isToolSelected(tool.id);
-          const gradientClass = toolColors[tool.id] || 'from-nanoBlue-500 to-purple-500';
+          const gradientClass = 'from-nanoBlue-500 to-purple-500';
 
           return (
             <motion.div
@@ -114,7 +100,7 @@ const ToolPalette = ({ className = '' }) => {
               <button
                 onClick={() => toggleTool(tool)}
                 className={clsx(
-                  'tool-item w-full p-4 rounded-xl transition-all duration-300 relative overflow-hidden group',
+                  'tool-item w-full h-32 p-4 rounded-xl transition-all duration-300 relative overflow-hidden group',
                   isSelected 
                     ? 'ring-2 ring-nanoBlue-500 bg-nanoBlue-500/20 border-nanoBlue-500' 
                     : 'hover:scale-105'
@@ -172,56 +158,6 @@ const ToolPalette = ({ className = '' }) => {
           );
         })}
       </div>
-
-      {/* Lista de herramientas seleccionadas */}
-      {selectedTools.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800/50 rounded-xl border border-slate-700 p-6"
-        >
-          <h3 className="text-lg font-bold text-white mb-4">
-            Herramientas Seleccionadas ({selectedTools.length})
-          </h3>
-          
-          <div className="space-y-4">
-            {selectedTools.map((tool, index) => {
-              const IconComponent = toolIcons[tool.id] || FiZap;
-              const gradientClass = toolColors[tool.id] || 'from-nanoBlue-500 to-purple-500';
-              
-              return (
-                <div
-                  key={tool.id}
-                  className="flex items-center space-x-4 p-3 bg-slate-900/50 rounded-lg"
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="w-6 h-6 bg-nanoBlue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                      {index + 1}
-                    </span>
-                    <div className={clsx(
-                      'w-10 h-10 rounded-lg flex items-center justify-center bg-gradient-to-br',
-                      gradientClass
-                    )}>
-                      <IconComponent className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white">{tool.name}</h4>
-                      <p className="text-xs text-slate-400">{tool.description}</p>
-                    </div>
-                  </div>
-                  
-                  <button
-                    onClick={() => toggleTool(tool)}
-                    className="ml-auto w-8 h-8 bg-red-500/20 hover:bg-red-500/30 rounded-lg flex items-center justify-center transition-colors"
-                  >
-                    <FiX className="w-4 h-4 text-red-400" />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
 
       {/* Mensaje cuando no hay herramientas */}
       {tools.length === 0 && !isLoading && (
