@@ -381,7 +381,7 @@ const Editor = () => {
               </div>
 
               {/* Custom Prompt */}
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <label className="block text-sm font-medium text-slate-300 mb-2">
                   Prompt Personalizado (Opcional)
                 </label>
@@ -395,10 +395,10 @@ const Editor = () => {
                 <p className="text-xs text-slate-400 mt-1">
                   Si proporcionas un prompt personalizado, se usará en lugar del prompt generado automáticamente
                 </p>
-              </div>
+              </div> */}
 
               {/* Generated Prompt Preview */}
-              {generatedPrompt && !customPrompt && selectedTools.length > 0 && (
+              {/* {generatedPrompt && !customPrompt && selectedTools.length > 0 && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Prompt Combinado Generado
@@ -409,7 +409,7 @@ const Editor = () => {
                     </p>
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Generate Button */}
               <button

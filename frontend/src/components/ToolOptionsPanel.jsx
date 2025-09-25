@@ -290,7 +290,7 @@ const ToolOptionsPanel = ({ className = '', compact = false }) => {
         <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700">
           {generatedPrompt ? (
             <p className="text-sm text-slate-300 font-mono leading-relaxed">
-              {generatedPrompt}
+              Ok!!
             </p>
           ) : (
             <p className="text-sm text-slate-400 italic">
