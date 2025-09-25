@@ -1,7 +1,7 @@
 {
   "name": "soragemi-x-frontend",
   "version": "1.0.0",
-  "description": "Frontend para SoraGemiX - Sistema de edición de imágenes con IA",
+  "description": "Frontend para ZoraGemiX - Sistema de edición de imágenes con IA",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -39,6 +39,6 @@
     "image-editing",
     "ai"
   ],
-  "author": "SoraGemiX Team",
+  "author": "ZoraGemiX Team",
   "license": "MIT"
 }

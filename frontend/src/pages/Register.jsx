@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ZoraLogo from '../components/ZoraLogo';
+import '../styles/Editor.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -110,13 +112,24 @@ const Register = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="inline-block"
           >
-            <div className="w-16 h-16 bg-gradient-to-r from-nanoBlue-500 to-purple-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">S</span>
+            <div className="auth-logo-container mx-auto mb-4">
+              <ZoraLogo 
+                size={64} 
+                color="gradient" 
+                strokeWidth={2}
+                className="transition-all duration-300 hover:scale-110"
+              />
+              {/* Enhanced glow effect para el registro */}
+              <div className="auth-logo-glow"></div>
             </div>
           </motion.div>
           
-          <h1 className="text-3xl font-bold text-holographic mb-2">
-            SoraGemiX
+          <h1 className="text-3xl font-bold mb-2 flex items-center justify-center space-x-1">
+            <span className="bg-gradient-to-r from-nanoBlue-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+              Zora
+            </span>
+            <span className="text-nanoBlue-400">Gemi</span>
+            <span className="text-purple-400">X</span>
           </h1>
           <p className="text-slate-400">
             Crea tu cuenta y comienza a transformar imágenes
@@ -279,7 +292,7 @@ const Register = () => {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center mt-8 text-slate-500 text-sm"
         >
-          <p>© 2024 SoraGemiX. Transformando imágenes con IA.</p>
+          <p>© 2024 ZoraGemiX. Transformando imágenes con IA.</p>
         </motion.div>
       </motion.div>
     </div>

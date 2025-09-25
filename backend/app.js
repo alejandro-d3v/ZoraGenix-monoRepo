@@ -78,7 +78,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 app.get('/health', (req, res) => {
   res.json({
     success: true,
-    message: 'SoraGemiX API está funcionando correctamente',
+    message: 'ZoraGemiX API está funcionando correctamente',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development'

@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Paleta principal de SoraGemiX
+        // Paleta principal de ZoraGemiX
         nanoBlue: {
           50: '#e6f7ff',
           100: '#bae7ff',

@@ -1,10 +1,10 @@
-# SoraGemiX v1.0 🌟
+# ZoraGemiX v1.0 🌟
 
 Sistema de edición de imágenes con IA utilizando la API Nano-Banana (Gemini 2.5 Flash Image Preview).
 
 ## 🎨 Branding
 
-**SoraGemiX** combina "Sora" (cielo en japonés) con "Gemini" y "X" (transformación), representando la transformación de imágenes hacia nuevas dimensiones creativas.
+**ZoraGemiX** combina "Sora" (cielo en japonés) con "Gemini" y "X" (transformación), representando la transformación de imágenes hacia nuevas dimensiones creativas.
 
 ### Logo y Colores
 - **Isotipo**: Slime estilizado con efecto holográfico
@@ -61,7 +61,7 @@ Sistema de edición de imágenes con IA utilizando la API Nano-Banana (Gemini 2.
 1. **Clonar el repositorio**
 ```bash
 git clone <repository-url>
-cd SoraGemiX
+cd ZoraGemiX
 ```
 
 2. **Instalar dependencias**
@@ -92,7 +92,7 @@ El frontend estará disponible en `http://localhost:5173` y el backend en `http:
 ## 📁 Estructura del Proyecto
 
 ```
-SoraGemiX/
+ZoraGemiX/
 ├── package.json                 # Monorepo configuration
 ├── README.md
 ├── database/
@@ -189,7 +189,7 @@ Este proyecto está bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) par
 
 ## 👥 Equipo
 
-Desarrollado por el equipo SoraGemiX
+Desarrollado por el equipo ZoraGemiX
 
 ---
 

@@ -1,8 +1,8 @@
-# SoraGemiX - Logo y Branding
+# ZoraGemiX - Logo y Branding
 
 ## Concepto del Logo
 
-El logo de **SoraGemiX** representa un **slime estilizado** con efectos holográficos, simbolizando la transformación fluida y mágica de las imágenes mediante inteligencia artificial.
+El logo de **ZoraGemiX** representa un **slime estilizado** con efectos holográficos, simbolizando la transformación fluida y mágica de las imágenes mediante inteligencia artificial.
 
 ### Elementos del Diseño
 
@@ -32,7 +32,7 @@ El logo de **SoraGemiX** representa un **slime estilizado** con efectos holográ
 
 ### Variaciones del Logo
 
-1. **Versión Completa**: Logo + texto "SoraGemiX"
+1. **Versión Completa**: Logo + texto "ZoraGemiX"
 2. **Solo Isotipo**: Solo el slime para espacios reducidos
 3. **Versión Monocromática**: Para usos en una sola tinta
 4. **Versión Invertida**: Para fondos claros
@@ -60,4 +60,4 @@ El logo utiliza:
 
 ---
 
-*El logo de SoraGemiX captura la esencia de la transformación digital: fluida, mágica y llena de posibilidades infinitas.*
+*El logo de ZoraGemiX captura la esencia de la transformación digital: fluida, mágica y llena de posibilidades infinitas.*

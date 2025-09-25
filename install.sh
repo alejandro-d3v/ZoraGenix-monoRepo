@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script de instalación y configuración de SoraGemiX
-echo "🚀 Instalando SoraGemiX v1.0..."
+# Script de instalación y configuración de ZoraGemiX
+echo "🚀 Instalando ZoraGemiX v1.0..."
 echo "=================================="
 
 # Verificar Node.js
@@ -66,4 +66,4 @@ echo "   Backend:  http://localhost:5000"
 echo ""
 echo "📚 Documentación completa en README.md"
 echo ""
-echo "¡Disfruta transformando imágenes con SoraGemiX! ✨"
+echo "¡Disfruta transformando imágenes con ZoraGemiX! ✨"

@@ -1,4 +1,4 @@
-Estoy en el repositorio SoraGemiX v1.0 y necesito que construyas el
+Estoy en el repositorio ZoraGemiX v1.0 y necesito que construyas el
 sistema con las siguientes especificaciones técnicas y requerimientos de
 funcionalidades para la primera entrega parcial.
 
@@ -98,7 +98,7 @@ funcionalidades para la primera entrega parcial.
 
 **Tarea del agente:**
 
-Genera toda la estructura inicial del sistema **SoraGemiX** con las
+Genera toda la estructura inicial del sistema **ZoraGemiX** con las
 funcionalidades antes descritas, dejando el proyecto corriendo con
 backend (Node + Express + mysql) y frontend (React + Vite + Tailwind).
 
@@ -107,7 +107,7 @@ backend (Node + Express + mysql) y frontend (React + Vite + Tailwind).
 Esta estructura solo es a manera de ejemplo, crear los archivos que
 crear conveniente, pero manteniendo las buenas practicas y convenciones
 
-SoraGemiX/
+ZoraGemiX/
 
 │ package.json \# Raíz monorepo -- define workspaces \"frontend\" y
 \"backend\"
@@ -257,7 +257,7 @@ colorUtils.js
 
 ## **Branding & UX** {#branding-ux .unnumbered}
 
-1.  Generar un **logo vectorial** (SVG) y una marca "SoraGemiX" cuyo
+1.  Generar un **logo vectorial** (SVG) y una marca "ZoraGemiX" cuyo
     > isotipo sea un slime estilizado con efecto holográfico.
 
 2.  README debe explicar el **significado** y la paleta de colores
@@ -359,14 +359,14 @@ colorUtils.js
   > podrá ver es la página del registrarse con la opción de
   > redireccionar al login si ya tiene cuenta; también estará presente
   > el navbar, pero solo mostrará en la parte izquierda el logo/nombre
-  > SoraGemiX y al lado izquierdo los botones de "Iniciar Sesión" y
+  > ZoraGemiX y al lado izquierdo los botones de "Iniciar Sesión" y
   > "Registrarse" con estilos llamativos en el botón de "Registrarse"
 
 - **Login / Registro** → guarda JWT en localStorage.
 
 - Si el usuario logueado es un usuario con rol usuario u otro que no sea
   > el admin entonces el **Navbar** muestra:  
-  > • Logo SoraGemiX, links: *Galería*, *Editor  
+  > • Logo ZoraGemiX, links: *Galería*, *Editor  
   > * • Contador "Imágenes restantes: X/Y"  
   > • Menú Perfil (editar perfil, cambiar contraseña, cerrar sesión)  
   >   

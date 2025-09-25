@@ -15,6 +15,7 @@ import ToolConfigSidebar from '../components/ToolConfigSidebar';
 import ImageUploader from '../components/ImageUploader';
 import LoadingSpinner from '../components/LoadingSpinner';
 import GenerationProgress from '../components/GenerationProgress';
+import ZoraLogo from '../components/ZoraLogo';
 
 const Editor = () => {
   const { user, logout } = useAuth();
@@ -211,14 +212,26 @@ const Editor = () => {
       {/* Header */}
       <header className="navbar-glass sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20 py-3">
             {/* Logo */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-nanoBlue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                <span className="text-lg font-bold text-white">S</span>
+              <div className="zora-logo-container">
+                <ZoraLogo 
+                  size={36} 
+                  color="gradient" 
+                  strokeWidth={2}
+                  animated={isGenerating}
+                  className="transition-all duration-300 hover:scale-110 z-10"
+                />
+                {/* Enhanced glow effect */}
+                <div className="zora-logo-glow"></div>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-holographic">SoraGemiX</h1>
+                <h1 className="text-xl font-bold flex items-center space-x-1">
+                  <span className="brand-text">Zora</span>
+                  <span className="text-nanoBlue-400">Gemi</span>
+                  <span className="text-purple-400">X</span>
+                </h1>
                 <p className="text-xs text-slate-400">Editor de Imágenes IA</p>
               </div>
             </div>

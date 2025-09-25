@@ -99,7 +99,7 @@ class SystemConfig {
       const nanoApiKey = await this.get('nano_api_key');
 
       return {
-        app_name: appName || 'SoraGemiX',
+        app_name: appName || 'ZoraGemiX',
         app_version: appVersion || '1.0.0',
         has_nano_api_key: !!nanoApiKey
       };
@@ -145,7 +145,7 @@ class SystemConfig {
       const appVersion = await this.get('app_version');
 
       return {
-        app_name: appName || 'SoraGemiX',
+        app_name: appName || 'ZoraGemiX',
         app_version: appVersion || '1.0.0'
       };
     } catch (error) {

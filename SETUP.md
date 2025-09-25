@@ -1,6 +1,6 @@
-# 🚀 Guía de Instalación y Configuración - SoraGemiX v1.0
+# 🚀 Guía de Instalación y Configuración - ZoraGemiX v1.0
 
-Esta guía te ayudará a configurar y ejecutar el sistema SoraGemiX completo en tu entorno local.
+Esta guía te ayudará a configurar y ejecutar el sistema ZoraGemiX completo en tu entorno local.
 
 ## 📋 Requisitos Previos
 
@@ -173,14 +173,14 @@ Respuesta esperada:
 ```json
 {
   "success": true,
-  "message": "SoraGemiX API está funcionando correctamente",
+  "message": "ZoraGemiX API está funcionando correctamente",
   "timestamp": "2024-01-01T00:00:00.000Z",
   "version": "1.0.0"
 }
 ```
 
 ### 2. Verificar Frontend
-Abre http://localhost:5173 en tu navegador. Deberías ver la página de login de SoraGemiX.
+Abre http://localhost:5173 en tu navegador. Deberías ver la página de login de ZoraGemiX.
 
 ### 3. Verificar Base de Datos
 ```sql
@@ -228,7 +228,7 @@ Asegúrate de que el archivo `backend/.env` existe y contiene todas las variable
 ## 📊 Estructura de Archivos Importante
 
 ```
-SoraGemiX/
+ZoraGemiX/
 ├── backend/
 │   ├── .env                 # Variables de entorno (crear desde .env.example)
 │   ├── server.js           # Servidor principal
@@ -261,4 +261,4 @@ Si encuentras problemas:
 
 ---
 
-¡Disfruta transformando imágenes con SoraGemiX! ✨🚀
+¡Disfruta transformando imágenes con ZoraGemiX! ✨🚀

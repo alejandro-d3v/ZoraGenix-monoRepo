@@ -20,7 +20,7 @@ const startServer = async () => {
     // Iniciar servidor
     const server = app.listen(PORT, () => {
       console.log('🚀 ===================================');
-      console.log('🌟 SoraGemiX Backend Server Started');
+      console.log('🌟 ZoraGemiX Backend Server Started');
       console.log('🚀 ===================================');
       console.log(`📡 Servidor ejecutándose en puerto: ${PORT}`);
       console.log(`🌐 URL: http://localhost:${PORT}`);

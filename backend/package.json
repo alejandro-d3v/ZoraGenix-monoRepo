@@ -1,7 +1,7 @@
 {
   "name": "soragemi-x-backend",
   "version": "1.0.0",
-  "description": "Backend API para SoraGemiX - Sistema de edición de imágenes con IA",
+  "description": "Backend API para ZoraGemiX - Sistema de edición de imágenes con IA",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -33,6 +33,6 @@
     "jwt",
     "image-processing"
   ],
-  "author": "SoraGemiX Team",
+  "author": "ZoraGemiX Team",
   "license": "MIT"
 }

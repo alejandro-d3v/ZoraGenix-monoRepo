@@ -19,7 +19,7 @@ const ProtectedRoute = ({ children }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Cargando SoraGemiX..." />
+        <LoadingSpinner size="lg" text="Cargando ZoraGemiX..." />
       </div>
     );
   }
@@ -57,7 +57,7 @@ const PublicRoute = ({ children }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <LoadingSpinner size="lg" text="Cargando SoraGemiX..." />
+        <LoadingSpinner size="lg" text="Cargando ZoraGemiX..." />
       </div>
     );
   }

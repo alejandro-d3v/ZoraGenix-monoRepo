@@ -1,7 +1,7 @@
 {
   "name": "soragemi-x",
   "version": "1.0.0",
-  "description": "Sistema de edición de imágenes con IA - SoraGemiX",
+  "description": "Sistema de edición de imágenes con IA - ZoraGemiX",
   "private": true,
   "workspaces": [
     "frontend",
@@ -23,6 +23,6 @@
     "react",
     "nodejs"
   ],
-  "author": "SoraGemiX Team",
+  "author": "ZoraGemiX Team",
   "license": "MIT"
 }

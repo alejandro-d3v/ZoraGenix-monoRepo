@@ -17,7 +17,9 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserImages, searchImages, deleteImage, downloadImage } from '../services/nanoBanana';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ZoraLogo from '../components/ZoraLogo';
 import toast from 'react-hot-toast';
+import '../styles/Editor.css';
 
 const Gallery = () => {
   const { user } = useAuth();
@@ -142,14 +144,25 @@ const Gallery = () => {
       {/* Header */}
       <header className="navbar-glass sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-20 py-3">
             <div className="flex items-center space-x-4">
               <Link to="/editor" className="btn-ghost flex items-center space-x-2">
                 <FiChevronLeft className="w-4 h-4 mr-2" />
                 Volver al Editor
               </Link>
               <div className="h-6 w-px bg-slate-600" />
-              <h1 className="text-xl font-bold text-white">Mi Galería</h1>
+              <div className="flex items-center space-x-3">
+                <div className="zora-logo-container">
+                  <ZoraLogo 
+                    size={36} 
+                    color="gradientDark" 
+                    strokeWidth={1.5}
+                    className="transition-all duration-300 hover:scale-110"
+                  />
+                  <div className="zora-logo-glow" style={{ opacity: 0.2 }}></div>
+                </div>
+                <h1 className="text-xl font-bold text-white">Mi Galería</h1>
+              </div>
             </div>
 
             <div className="flex items-center space-x-4">
